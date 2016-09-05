@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "Nocturne",
+  "version": "0.0",
+
+  "description":  "Fine-grained privacy control for Firefox.",
+  "homepage_url": "https://github.com/xavierholt/nocturne",
+
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "tabs"
+  ],
+
+  "background": {
+    "scripts": [
+      "lib/core/cache.js",
+      "lib/core/rules.js",
+      "lib/core/types.js",
+      "lib/core/main.js"
+    ]
+  }
+}
