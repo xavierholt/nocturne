@@ -9,15 +9,26 @@
   "permissions": [
     "webRequest",
     "webRequestBlocking",
+    "storage",
     "tabs"
   ],
 
   "background": {
     "scripts": [
-      "lib/core/cache.js",
-      "lib/core/rules.js",
-      "lib/core/types.js",
-      "lib/core/main.js"
+      "lib/cache.js",
+      "lib/rules.js",
+      "lib/types.js",
+      "lib/main.js"
     ]
+  },
+
+  // "applications": {
+  //   "gecko": {
+  //     "id": "nocturne@mozilla.org"
+  //   }
+  // },
+
+  "options_ui": {
+    "page": "gui/settings.html"
   }
 }
