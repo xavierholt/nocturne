@@ -8,10 +8,10 @@ function ruleset(defs) {
 
   // Shuffle to catch insertion order bugs:
   for(let i = defs.length; i; --i) {
-    let j = Math.floor(Math.random() * i);
-    let t = defs[i - 1];
-    defs[i - 1] = defs[j];
-    defs[j] = t;
+    let j = Math.floor(Math.random() * i)
+    let t = defs[i - 1]
+    defs[i - 1] = defs[j]
+    defs[j] = t
   }
 
   for(const def of defs) {
@@ -175,6 +175,19 @@ describe('RuleSet', function() {
       let url  = new URL('http://www.example.com')
       let rule = rules.get(parse.url([url, url]))
       assert.deepEqual(rule, {a: 'a', b: 'b', c: 'c', d: 'd'})
+    })
+
+    it('should always use Map methods', function() {
+      let rules = ruleset([
+        ['**', '**', {rule: 'hello'}]
+      ])
+
+      // This is a potential bug because Map#get() exists:
+      // Looking up the next rule with square brackets returns it!
+      // This test should make sure we always use Map#get() instead...
+      let url  = new URL('http://www.example.com/get')
+      let rule = rules.get(parse.url([url, url]))
+      assert.deepEqual(rule, {rule: 'hello'})
     })
   })
 })

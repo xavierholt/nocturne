@@ -1,0 +1,32 @@
+{
+  "name":     "nocturne",
+  "version":  "0.1.0",
+  "license":  "GPL-3.0",
+
+  "description": "Fine-grained privacy control for Firefox.",
+  "keywords":    ["web", "extension", "privacy"],
+
+  "homepage": "https://github.com/xavierholt/nocturne",
+  "bugs": {
+    "url": "https://github.com/xavierholt/nocturne/issues"
+  },
+
+  "files": [
+    "./gui",
+    "./lib",
+    "./LICENSE",
+    "./manifest.json",
+    "./package.json",
+    "./README.md",
+    "./test"
+  ],
+
+  "devDependencies": {
+    "istanbul": "latest",
+    "mocha":    "latest"
+  },
+  "scripts": {
+    "coverage": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha",
+    "test":     "./node_modules/mocha/bin/mocha"
+  }
+}
