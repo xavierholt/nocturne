@@ -32,7 +32,7 @@ describe('Rule', function() {
       let r = new rules.Rule('Bob')
       assert.equal(r.fork, null)
       assert.deepEqual(r.next, {})
-      assert.equal(r.rule, null)
+      assert.equal(r.data, null)
     })
   })
 })
@@ -157,6 +157,17 @@ describe('RuleSet', function() {
         ['**.example.com',     '***', {rule: 'b'}],
         ['**.com',             '***', {rule: 'c'}],
         ['**',                 '***', {rule: 'd'}]
+      ])
+
+      let url  = new URL('http://www.example.com')
+      let rule = rules.get(parse.url([url, url]))
+      assert.deepEqual(rule, {rule: 'a'})
+    })
+
+    it('should prefer the most specific domain', function() {
+      let rules = ruleset([
+        ['*.example.com', '***', {rule: 'a'}],
+        ['www.*.com',     '***', {rule: 'b'}]
       ])
 
       let url  = new URL('http://www.example.com')

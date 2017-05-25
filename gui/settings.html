@@ -5,22 +5,21 @@
     <link rel="stylesheet" href="settings.css" />
   </head>
   <body>
-    <table id="rule-list">
-      <thead>
-        <tr>
-          <td><input type="checkbox" /></td>
-          <td>Source</td>
-          <td>Destination</td>
-          <td>Policy</td>
-        </tr>
-      </thead>
-    </table>
-    <div id="rule-edit">
-      <button>New</button>
-      <button>Delete</button>
-      <button>Sort</button>
-      <button>Save</button>
+    <div id="wrapper">
+      <div id="header">
+        <a id="load" style="float:right" href="#">Load</a>
+        <a id="save" style="float:right" href="#">Save</a>
+        <h1>Rules</h1>
+      </div>
+      <table id="rule-meta">
+        <tbody id="rule-edit"></tbody>
+        <tbody id="rule-list"></tbody>
+      </table>
+      <div id="footer">
+        Footer!
+      </div>
     </div>
+    <script src="/lib/chrome.js"></script>
     <script src="settings.js"></script>
   </body>
 </html>

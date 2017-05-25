@@ -17,6 +17,7 @@
 
   "background": {
     "scripts": [
+      "lib/chrome.js",
       "lib/cache.js",
       "lib/parse.js",
       "lib/rules.js",
@@ -26,6 +27,7 @@
   },
 
   "options_ui": {
-    "page": "gui/settings.html"
+    "page": "gui/settings.html",
+    "open_in_tab": true
   }
 }
