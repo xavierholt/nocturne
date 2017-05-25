@@ -30,9 +30,9 @@ describe('parse', function() {
 
     it('should expand terminal **s to arbitrary strings', function() {
       let url = '**.example.com/path/to/**'
-      assert.deepEqual(parse.rule(url, '**'), [
-        ['com', 'example', '**'],
-        ['path', 'to', '**']
+      assert.deepEqual(parse.rule(url, 'cats'), [
+        ['com', 'example', 'cats'],
+        ['path', 'to', 'cats']
       ])
     })
 

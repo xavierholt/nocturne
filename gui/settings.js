@@ -107,12 +107,14 @@ load()
 rule_edit.addEventListener('click', function(event) {
   if(event.target.classList.contains('mk')) {
     grow(rule_list, read(rule_edit.children[0]))
+    event.preventDefault()
   }
 })
 
 rule_list.addEventListener('click', function(event) {
   if(event.target.classList.contains('rm')) {
     rule_list.removeChild(event.target.parentNode.parentNode)
+    event.preventDefault()
   }
 })
 
