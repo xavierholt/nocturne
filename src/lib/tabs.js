@@ -1,3 +1,4 @@
+// istanbul ignore else
 if(typeof URL === 'undefined') {
   URL = require('url').URL
 }

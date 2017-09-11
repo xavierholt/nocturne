@@ -6,6 +6,10 @@ describe('tabs', function() {
     tabs.cache.clear()
   })
 
+  after(function() {
+    tabs.cache.clear()
+  })
+
   const WWWREQ = {id: 42, url: 'https://www.example.com'}
   const APIREQ = {id: 42, url: 'https://api.example.com'}
 
