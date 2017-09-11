@@ -1,10 +1,31 @@
-let assert = require('assert')
-let URL    = require('url').URL
-let rules  = require('../lib/rules.js')
-let parse  = require('../lib/parse.js')
+const assert = require('assert')
+const URL    = require('url').URL
+const Frie   = require('../src/lib/frie.js')
+const parse  = require('../src/lib/parse.js')
+
+class RuleSet {
+  constructor(rules) {
+    this.root = new Frie()
+  }
+
+  add(src, dst, data) {
+    let s = parse.rule(src, '**')
+    let d = parse.rule(dst, '**')
+    this.root.set(s.concat(d), data)
+  }
+
+  get(src, dst) {
+    let s = parse.url(src)
+    let d = parse.url(dst)
+
+    let data = new Object()
+    this.root.glob(s.concat(d), x => {data = Object.assign(data, x)})
+    return data
+  }
+}
 
 function ruleset(defs) {
-  let rs = new rules.RuleSet()
+  let rs = new RuleSet()
 
   // Shuffle to guard against insertion order bugs:
   for(let i = defs.length; i; --i) {
@@ -15,32 +36,16 @@ function ruleset(defs) {
   }
 
   for(const def of defs) {
-    rs.add(parse.rule([def[0], def[1]], '**'), def[2])
+    rs.add(def[0], def[1], def[2])
   }
 
   return rs
 }
 
-describe('Rule', function() {
-  describe('#constructor()', function() {
-    it('should take a name', function() {
-      let r  = new rules.Rule('Fred')
-      assert.equal(r.name, 'Fred')
-    })
-
-    it('should set default values', function() {
-      let r = new rules.Rule('Bob')
-      assert.equal(r.fork, null)
-      assert.deepEqual(r.next, {})
-      assert.equal(r.data, null)
-    })
-  })
-})
-
 describe('RuleSet', function() {
   describe('#constructor()', function() {
     it('should exist', function() {
-      let s = new rules.RuleSet
+      let s = new RuleSet()
     })
   })
 
@@ -51,7 +56,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'example'})
     })
 
@@ -61,7 +66,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'example'})
     })
 
@@ -71,7 +76,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'example'})
     })
 
@@ -81,7 +86,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'example'})
     })
 
@@ -92,7 +97,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'a'})
     })
 
@@ -103,7 +108,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'a'})
     })
 
@@ -114,7 +119,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'a'})
     })
 
@@ -125,7 +130,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'a'})
     })
 
@@ -136,7 +141,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'a'})
     })
 
@@ -147,19 +152,20 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'a'})
     })
 
     it('should prefer the least greedy match', function() {
       let rules = ruleset([
-        ['www.example.**', '***', {rule: 'a'}],
-        ['www.**',         '***', {rule: 'b'}],
-        ['**',             '***', {rule: 'c'}]
+        ['www.example.com.**', '***', {rule: 'a'}],
+        ['www.example.**',     '***', {rule: 'b'}],
+        ['www.**',             '***', {rule: 'c'}],
+        ['**',                 '***', {rule: 'd'}]
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'a'})
     })
 
@@ -172,18 +178,19 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'a'})
     })
 
     it('should prefer the most specific domain', function() {
       let rules = ruleset([
         ['*.example.com', '***', {rule: 'a'}],
-        ['www.*.com',     '***', {rule: 'b'}]
+        ['www.*.com',     '***', {rule: 'b'}],
+        ['www.example.*', '***', {rule: 'c'}]
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'a'})
     })
 
@@ -196,7 +203,7 @@ describe('RuleSet', function() {
       ])
 
       let url  = new URL('http://www.example.com')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {a: 'a', b: 'b', c: 'c', d: 'd'})
     })
 
@@ -209,7 +216,7 @@ describe('RuleSet', function() {
       // Looking up the next rule with square brackets returns it!
       // This test should make sure we always use Map#get() instead.
       let url  = new URL('http://www.example.com/get')
-      let rule = rules.get(parse.url([url, url]))
+      let rule = rules.get(url, url)
       assert.deepEqual(rule, {rule: 'hello'})
     })
   })

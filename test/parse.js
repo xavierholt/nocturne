@@ -1,6 +1,6 @@
-let assert = require('assert')
-let URL    = require('url').URL
-let parse  = require('../lib/parse.js')
+const assert = require('assert')
+const URL    = require('url').URL
+const parse  = require('../src/lib/parse.js')
 
 describe('parse', function() {
   describe('#rule()', function() {
@@ -29,6 +29,7 @@ describe('parse', function() {
     })
 
     it('should expand terminal **s to arbitrary strings', function() {
+      // This isn't a "production" feature, but it's very useful for testing.
       let url = '**.example.com/path/to/**'
       assert.deepEqual(parse.rule(url, 'cats'), [
         ['com', 'example', 'cats'],
@@ -41,17 +42,6 @@ describe('parse', function() {
       assert.deepEqual(parse.rule(url), [
         ['com', '**', 'www'],
         ['path', '**', 'file.txt']
-      ])
-    })
-
-    it('should concatenate multiple parses', function() {
-      let src = 'www.example.com'
-      let dst = 'api.example.com'
-      assert.deepEqual(parse.rule([src, dst]), [
-        ['com', 'example', 'www'],
-        ['***'],
-        ['com', 'example', 'api'],
-        ['***']
       ])
     })
   })
@@ -69,17 +59,6 @@ describe('parse', function() {
       let url = new URL('https://www.example.com')
       assert.deepEqual(parse.url(url), [
         ['com', 'example', 'www'],
-        ['']
-      ])
-    })
-
-    it('should concatenate multiple parses', function() {
-      let src = new URL('https://www.example.com')
-      let dst = new URL('https://api.example.com')
-      assert.deepEqual(parse.url([src, dst]), [
-        ['com', 'example', 'www'],
-        [''],
-        ['com', 'example', 'api'],
         ['']
       ])
     })

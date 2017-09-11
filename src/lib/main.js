@@ -20,10 +20,9 @@ let myrules = ruleset([
 ])
 
 function intercept(request) {
-  request.nocturne = true
   if(request.tabId > 0) {
     //TODO: Potential race condition!
-    var src = tabs[request.tabId]
+    var src = tabs.get(request.tabId)
   }
   else if(request.originUrl) {
     // Workaround for #1 - no TabID for Firefox favicon GETs:
@@ -60,39 +59,36 @@ function intercept(request) {
 }
 
 function log_request(request) {
-  let tmp = Object.assign({}, request)
-
   if(request.requestHeaders) {
-    tmp.headers = {}
-    request.requestHeaders.forEach(header => {
-      tmp.headers[header.name] = header.value
+    request.headers = request.requestHeaders.map(header => {
+      header.name + ': ' + header.value
     })
   }
 
-  if(request.requestBody && request.requestBody.raw) {
-    let decoder = new TextDecoder('utf-8')
-    tmp.body = request.requestBody.raw.map(item => {
-      return decoder.decode(item.bytes)
-    })
-  }
+  // if(request.requestBody && request.requestBody.raw) {
+  //   let decoder = new TextDecoder('utf-8')
+  //   request.body = request.requestBody.raw.map(item => {
+  //     return decoder.decode(item.bytes)
+  //   })
+  // }
 
-  console.log(tmp)
+  console.log(request)
 }
 
 // browser.webRequest.onBeforeRequest.addListener(
 //   log_request,
-//   {urls: ["<all_urls>"]},
-//   ["requestBody"]
+//   {urls: ['<all_urls>']},
+//   ['requestBody']
 // )
 
 // browser.webRequest.onSendHeaders.addListener(
 //   log_request,
-//   {urls: ["<all_urls>"]},
-//   ["requestHeaders"]
+//   {urls: ['<all_urls>']},
+//   ['requestHeaders']
 // )
 
 browser.webRequest.onBeforeSendHeaders.addListener(
   intercept,
-  {urls: ["<all_urls>"]},
-  ["blocking", "requestHeaders"]
+  {urls: ['<all_urls>']},
+  ['blocking', 'requestHeaders']
 )

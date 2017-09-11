@@ -17,17 +17,13 @@
 
   "background": {
     "scripts": [
-      "lib/chrome.js",
-      "lib/cache.js",
-      "lib/parse.js",
-      "lib/rules.js",
-      "lib/types.js",
-      "lib/main.js"
+      "src/ext/chrome.js",
+      "src/app/main.js"
     ]
   },
 
   "options_ui": {
-    "page": "gui/settings.html",
+    "page": "src/gui/settings.html",
     "open_in_tab": true
   }
 }
