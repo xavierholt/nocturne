@@ -9,40 +9,14 @@ class Frie {
     this.all  = null
   }
 
-  _find(rule, func, x = 0, y = 0) {
-    let path = rule[x]
-    let next = null
-
-    if(y < path.length) {
-      switch(path[y]) {
-        case '***': next = this.all; break
-        case '**':  next = this.any; break
-        case '*':   next = this.one; break
-        default:    next = this.next && this.next.get(path[y])
-      }
-
-      if(next) {
-        next._find(rule, func, x, y + 1)
-      }
-    }
-    else if(x < rule.length - 1) {
-      if(this.fork !== null) {
-        this.fork._find(rule, func, x + 1, 0)
-      }
-    }
-    else {
-      func(this)
-    }
+  del(rule) {
+    let node = this.node(rule)
+    if(node) node.data = undefined
   }
 
-  del(rule, x = 0, y = 0) {
-    this._find(rule, node => {node.data = undefined})
-  }
-
-  get(rule, x = 0, y = 0) {
-    let result = undefined
-    this._find(rule, node => {result = node.data})
-    return result
+  get(rule) {
+    let node = this.node(rule)
+    return node && node.data
   }
 
   glob(rule, func, x = 0, y = 0) {
@@ -75,6 +49,32 @@ class Frie {
       if(this.fork !== null) {
         this.fork.glob(rule, func, x + 1, 0)
       }
+    }
+  }
+
+  node(rule, x = 0, y = 0) {
+    let path = rule[x]
+    let next = null
+
+    if(y < path.length) {
+      switch(path[y]) {
+        case '***': next = this.all; break
+        case '**':  next = this.any; break
+        case '*':   next = this.one; break
+        default:    next = this.next && this.next.get(path[y])
+      }
+
+      if(next) {
+        return next.node(rule, x, y + 1)
+      }
+    }
+    else if(x < rule.length - 1) {
+      if(this.fork !== null) {
+        return this.fork.node(rule, x + 1, 0)
+      }
+    }
+    else {
+      return this
     }
   }
 
