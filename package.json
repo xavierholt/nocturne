@@ -21,13 +21,18 @@
     "./test"
   ],
   "devDependencies": {
-    "istanbul": "latest",
-    "mocha": "latest"
+    "mocha": "^3.5.3",
+    "sinon": "^3.2.1",
+    "istanbul": "^0.4.5",
+    "webpack": "^3.5.6"
   },
   "scripts": {
     "benchmark": "node ./time/bench.js",
-    "coverage": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha",
-    "test": "./node_modules/mocha/bin/mocha"
+    "build": "webpack",
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha",
+    "test": "mocha"
   },
-  "dependencies": {}
+  "dependencies": {
+    "webextension-polyfill": "^0.1.1"
+  }
 }
