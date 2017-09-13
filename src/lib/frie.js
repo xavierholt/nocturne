@@ -1,4 +1,4 @@
-class Frie {
+module.exports = class Frie {
   constructor() {
     this.data = undefined
     this.next = null
@@ -106,5 +106,3 @@ class Frie {
     }
   }
 }
-
-module.exports = Frie

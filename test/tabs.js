@@ -59,7 +59,7 @@ describe('tabs', function() {
       assert.strictEqual(tabs.cache.get(ID), undefined)
     })
 
-    it('should not freak out if the tab to remove is missing', function() {
+    it('should not freak out if the tab is missing', function() {
       assert.strictEqual(tabs.cache.get(ID), undefined)
       assert.doesNotThrow(function() {
         tabs.handlers.onRemoved(ID)

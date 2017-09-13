@@ -3,19 +3,24 @@ const Policy = require('./policy.js')
 
 module.exports = class Custom extends Policy {
   constructor(filters) {
-    // TODO: Query parameter filtering!
+    super()
+    //TODO: Query parameter filtering!
     this.cookies = filters.cookies
     this.headers = filters.headers
   }
 
+  // onBeforeRequest(request) {
+  //   //TODO: Redirect to edit query params if desired.
+  // }
+
   onBeforeSendHeaders(request) {
     let headers = []
-    for(header of request.requestHeaders) {
+    for(const header of request.requestHeaders) {
       header.name = header.name.toLowerCase()
 
       if(header.name === 'cookie') {
         let cookies = []
-        for(cookie of parse.cookies(header.value)) {
+        for(const cookie of parse.cookies(header.value)) {
           let val = this.cookies.filter(cookie)
           if(val) cookies.push(`${cookie.name}=${val}`)
         }
@@ -26,7 +31,7 @@ module.exports = class Custom extends Policy {
       }
       else {
         let val = this.headers.filter(header)
-        if(val) headers.push({name: name, value: val})
+        if(val) headers.push({name: header.name, value: val})
       }
     }
 
@@ -36,11 +41,11 @@ module.exports = class Custom extends Policy {
   }
 
   onSendHeaders(request) {
-    for(header of request.requestHeaders) {
+    for(const header of request.requestHeaders) {
       header.name = header.name.toLowerCase()
 
       if(header.name === 'cookie') {
-        for(cookie of parse.cookies(header.value)) {
+        for(const cookie of parse.cookies(header.value)) {
           this.cookies.verify(cookie)
         }
       }
@@ -51,7 +56,7 @@ module.exports = class Custom extends Policy {
     }
   }
 
-  onHeadersReceived(request) {
-    //TODO: Add custom CSP here if desired.
-  }
+  // onHeadersReceived(request) {
+  //   //TODO: Add custom CSP here if desired.
+  // }
 }

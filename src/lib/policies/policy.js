@@ -33,4 +33,12 @@ module.exports = class Policy {
     // See the actual response headers here...
     // ...if everything worked normally.
   }
+
+  onCompleted(request) {
+    // We're done.
+  }
+
+  onErrorOccurred(request) {
+    // Oh nose!
+  }
 }
