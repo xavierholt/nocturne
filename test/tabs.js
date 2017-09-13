@@ -2,7 +2,7 @@ const assert = require('assert')
 const tabs   = require('../src/lib/tabs.js')
 
 describe('tabs', function() {
-  afterEach(function() {
+  beforeEach(function() {
     tabs.cache.clear()
   })
 

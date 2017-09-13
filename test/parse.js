@@ -21,7 +21,10 @@ describe('parse', function() {
     })
 
     it('should ignore invalid cookies', function() {
-      let cookies = parse.cookies('hi=there; bwahahahahahaha; bye=now')
+      let cookies = assert.logs('error', function() {
+        return parse.cookies('hi=there; bwahahahahahaha; bye=now')
+      })
+
       assert.deepEqual(cookies, [
         {name: 'hi',  value: 'there'},
         {name: 'bye', value: 'now'}

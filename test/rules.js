@@ -20,13 +20,9 @@ function ruleset(defs) {
 }
 
 describe('Ruleset', function() {
-  before(function() {
-    parse.glob = '**'
-  })
-
-  after(function() {
-    parse.glob = '***'
-  })
+  // This lets us test ** and *** separately:
+  before(function() {parse.glob =  '**'})
+  after( function() {parse.glob = '***'})
 
   describe('#constructor()', function() {
     it('should exist', function() {
@@ -52,6 +48,16 @@ describe('Ruleset', function() {
 
       let rule = rules.get(undefined, undefined)
       assert.deepEqual(rule, {rule: 'example'})
+    })
+
+    it('should return empty if nothing matches', function() {
+      let rules = ruleset([
+        ['www.example.com', '***', {rule: 'a'}]
+      ])
+
+      let url  = new URL('http://api.example.com')
+      let rule = rules.get(url, url)
+      assert.deepEqual(rule, {})
     })
 
     it('should match * wildcards', function() {

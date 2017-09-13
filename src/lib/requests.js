@@ -19,13 +19,12 @@ const handlers = {
     }
     else if(request.originUrl) {
       // Workaround for #1 - no TabID for Firefox favicon GETs:
-      console.warn('No TabID set - using Origin URL as source.')
+      console.warn('No TabID set - using Origin URL as source.', request)
       src = new URL(request.originUrl)
     }
     else {
       // We should never get here...
-      console.error('Could not determine source URL!')
-      console.error(request)
+      console.error('Could not determine source URL!', request)
     }
 
     let policy = rules.get(src, dst)
@@ -37,8 +36,7 @@ const handlers = {
     }
     else {
       // Once we get default rules this will be unnecessary...
-      console.error('No rule matches this request!')
-      console.error(request)
+      console.error('No rule matches this request!', request)
     }
   },
 

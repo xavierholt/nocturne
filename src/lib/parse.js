@@ -1,10 +1,14 @@
+const logger = require('./logger.js')
+
 function cookies(input) {
   let result = []
   input.split(/\s*;\s*/).forEach(crumb => {
     let index = crumb.indexOf('=')
     if(index === -1) {
-      // TODO: Reenable once we redirect logs during testing.
-      // console.error(`Failed to parse cookie: ${crumb}`)
+      logger.error('Failed to parse cookie!', {
+        input: input,
+        crumb: crumb
+      })
     }
     else {
       result.push({

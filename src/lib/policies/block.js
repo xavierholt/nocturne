@@ -1,14 +1,12 @@
 const Policy = require('./policy.js')
+const logger = require('../logger.js')
 
-class Block extends Policy {
+module.exports = class Block extends Policy {
   onBeforeRequest(request) {
     return {cancel: true}
   }
 
   onSendHeaders(request) {
-    console.warn('Blocked request sent!')
-    console.warn(request)
+    logger.warn('Blocked request sent!', request)
   }
 }
-
-module.exports = new Block()
