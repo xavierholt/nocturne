@@ -2,22 +2,6 @@
 // https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest
 
 module.exports = class Policy {
-  onBeforeRequest(request) {
-    // Cancel the request here.
-  }
-
-  onBeforeSendHeaders(request) {
-    // Modify request headers here.
-  }
-
-  onSendHeaders(request) {
-    // See the actual request headers here.
-  }
-
-  onHeadersReceived(request) {
-    // Modify response headers here.
-  }
-
   onAuthRequired(request) {
     // Provide credentials here.
     // See the actual response headers here...
@@ -29,9 +13,12 @@ module.exports = class Policy {
     // ...if there was a server-side redirect.
   }
 
-  onResponseStarted(request) {
-    // See the actual response headers here...
-    // ...if everything worked normally.
+  onBeforeRequest(request) {
+    // Cancel the request here.
+  }
+
+  onBeforeSendHeaders(request) {
+    // Modify request headers here.
   }
 
   onCompleted(request) {
@@ -40,5 +27,18 @@ module.exports = class Policy {
 
   onErrorOccurred(request) {
     // Oh nose!
+  }
+
+  onHeadersReceived(request) {
+    // Modify response headers here.
+  }
+
+  onResponseStarted(request) {
+    // See the actual response headers here...
+    // ...if everything worked normally.
+  }
+
+  onSendHeaders(request) {
+    // See the actual request headers here.
   }
 }

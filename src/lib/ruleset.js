@@ -1,7 +1,7 @@
 const Frie  = require('./frie.js')
 const parse = require('./parse.js')
 
-class Ruleset {
+module.exports = class Ruleset {
   constructor() {
     this.root = new Frie()
   }
@@ -21,5 +21,3 @@ class Ruleset {
     return data
   }
 }
-
-module.exports = Ruleset

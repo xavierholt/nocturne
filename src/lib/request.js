@@ -1,6 +1,6 @@
 const parse   = require('./parse.js')
 const Ruleset = require('./ruleset.js')
-const tabs    = require('./tabs.js')
+const tab     = require('./tab.js')
 
 const cache = new Map()
 let   rules = new Ruleset()
@@ -13,9 +13,9 @@ const handlers = {
     if(request.tabId > 0) {
       // NOTE: Potential race condition!
       // What's the tab URL of a main_frame request?
-      let tab = tabs.cache.get(request.tabId)
+      let srctab = tab.cache.get(request.tabId)
       // TODO: Add request logging to the tab cache.
-      src = tab.url
+      src = srctab.url
     }
     else if(request.originUrl) {
       // Workaround for #1 - no TabID for Firefox favicon GETs:
@@ -66,7 +66,32 @@ const handlers = {
   }
 }
 
+// Possible Values of the "WebRequest.type" Field
+// https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/ResourceType
+const types = [
+  'beacon',
+  'csp_report',
+  'font',
+  'image',
+  'imageset',
+  'main_frame',
+  'media',
+  'object',
+  'object_subrequest',
+  'ping',
+  'script',
+  'stylesheet',
+  'sub_frame',
+  'web_manifest',
+  'websocket',
+  'xbl',
+  'xml_dtd',
+  'xmlhttprequest',
+  'xslt'
+]
+
 module.exports = {
   cache:    cache,
-  handlers: handlers
+  handlers: handlers,
+  types:    types
 }
