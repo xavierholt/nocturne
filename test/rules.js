@@ -1,32 +1,8 @@
-const assert = require('assert')
-const URL    = require('url').URL
-const Frie   = require('../src/lib/frie.js')
-const parse  = require('../src/lib/parse.js')
-
-class RuleSet {
-  constructor(rules) {
-    this.root = new Frie()
-  }
-
-  add(src, dst, data) {
-    let s = parse.rule(src, '**')
-    let d = parse.rule(dst, '**')
-    this.root.set(s.concat(d), data)
-  }
-
-  get(src, dst) {
-    let s = parse.url(src)
-    let d = parse.url(dst)
-
-    let data = new Object()
-    this.root.glob(s.concat(d), x => {data = Object.assign(data, x)})
-    return data
-  }
-}
+const assert  = require('assert')
+const parse   = require('../src/lib/parse.js')
+const Ruleset = require('../src/lib/ruleset.js')
 
 function ruleset(defs) {
-  let rs = new RuleSet()
-
   // Shuffle to guard against insertion order bugs:
   for(let i = defs.length; i; --i) {
     let j = Math.floor(Math.random() * i)
@@ -35,6 +11,7 @@ function ruleset(defs) {
     defs[j] = t
   }
 
+  let rs = new Ruleset()
   for(const def of defs) {
     rs.add(def[0], def[1], def[2])
   }
@@ -42,10 +19,18 @@ function ruleset(defs) {
   return rs
 }
 
-describe('RuleSet', function() {
+describe('Ruleset', function() {
+  before(function() {
+    parse.glob = '**'
+  })
+
+  after(function() {
+    parse.glob = '***'
+  })
+
   describe('#constructor()', function() {
     it('should exist', function() {
-      let s = new RuleSet()
+      let s = new Ruleset()
     })
   })
 
@@ -57,6 +42,15 @@ describe('RuleSet', function() {
 
       let url  = new URL('http://www.example.com')
       let rule = rules.get(url, url)
+      assert.deepEqual(rule, {rule: 'example'})
+    })
+
+    it('should provide dummy defaults', function() {
+      let rules = ruleset([
+        ['?', '?', {rule: 'example'}]
+      ])
+
+      let rule = rules.get(undefined, undefined)
       assert.deepEqual(rule, {rule: 'example'})
     })
 
