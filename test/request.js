@@ -149,7 +149,7 @@ describe('request', function() {
         requestId: REQID
       })
 
-      assert(request.cache.has(REQID))
+      assert(!request.cache.has(REQID))
     })
   })
 
@@ -160,7 +160,7 @@ describe('request', function() {
         requestId: REQID
       })
 
-      assert(request.cache.has(REQID))
+      assert(!request.cache.has(REQID))
     })
   })
 })
