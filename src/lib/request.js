@@ -1,3 +1,4 @@
+const logger  = require('./logger.js')
 const parse   = require('./parse.js')
 const Ruleset = require('./ruleset.js')
 const tab     = require('./tab.js')
@@ -5,64 +6,79 @@ const tab     = require('./tab.js')
 const cache = new Map()
 let   rules = new Ruleset()
 
+function source(request) {
+  if(request.tabId > 0) {
+    // NOTE: Potential race condition!
+    // What's the tab URL of a main_frame request?
+    let srctab = tab.cache.get(request.tabId)
+    if(srctab === undefined) {
+      logger.error('No such tab cached!', request)
+    }
+    else {
+      return srctab.url
+    }
+  }
+
+  if(request.originUrl) {
+    // Workaround for #1 - no TabID for Firefox favicon GETs:
+    logger.warn('Using Origin URL as source.', request)
+    return new URL(request.originUrl)
+  }
+
+  // We should never get here...
+  logger.error('Could not determine source URL!', request)
+  return undefined
+}
+
 const handlers = {
   onBeforeRequest: function(request) {
-    let src = undefined
+    let src = source(request)
     let dst = new URL(request.url)
+    let pcy = rules.get(src, dst)
 
-    if(request.tabId > 0) {
-      // NOTE: Potential race condition!
-      // What's the tab URL of a main_frame request?
-      let srctab = tab.cache.get(request.tabId)
-      // TODO: Add request logging to the tab cache.
-      src = srctab.url
-    }
-    else if(request.originUrl) {
-      // Workaround for #1 - no TabID for Firefox favicon GETs:
-      console.warn('No TabID set - using Origin URL as source.', request)
-      src = new URL(request.originUrl)
-    }
-    else {
-      // We should never get here...
-      console.error('Could not determine source URL!', request)
-    }
-
-    let policy = rules.get(src, dst)
-    // TODO: Look up policy by request type.
-
-    if(policy) {
-      cache.set(request.requestId, policy)
-      return policy.onBeforeRequest(request)
-    }
-    else {
-      // Once we get default rules this will be unnecessary...
-      console.error('No rule matches this request!', request)
-    }
+    cache.set(request.requestId, pcy)
+    return pcy.onBeforeRequest(request)
   },
 
   onBeforeSendHeaders: function(request) {
-    const policy = cache.get(request.requestId)
-    if(policy) return policy.onBeforeSendHeaders(request)
+    const pcy = cache.get(request.requestId)
+    if(pcy === undefined) {
+      // Theoretically unreachable...
+      logger.error('No policy cached for request!', request)
+    }
+    else {
+      return pcy.onBeforeSendHeaders(request)
+    }
   },
 
   onSendHeaders: function(request) {
-    const policy = cache.get(request.requestId)
-    if(policy) return policy.onSendHeaders(request)
+    const pcy = cache.get(request.requestId)
+    if(pcy === undefined) {
+      // Theoretically unreachable...
+      logger.error('No policy cached for request!', request)
+    }
+    else {
+      return pcy.onSendHeaders(request)
+    }
   },
 
   onHeadersReceived: function(request) {
-    const policy = cache.get(request.requestId)
-    if(policy) return policy.onHeadersReceived(request)
+    const pcy = cache.get(request.requestId)
+    if(pcy === undefined) {
+      // Theoretically unreachable...
+      logger.error('No policy cached for request!', request)
+    }
+    else {
+      return pcy.onHeadersReceived(request)
+    }
   },
 
   onCompleted: function(request) {
-    tabs.cache.delete(request.tabId)
+    cache.delete(request.requestId)
   },
 
   onErrorOccurred: function(request) {
-    tabs.cache.delete(request.tabId)
-    // console.warn('A request error occurred!')
-    // console.warn(request.error)
+    cache.delete(request.requestId)
   }
 }
 
@@ -93,5 +109,7 @@ const types = [
 module.exports = {
   cache:    cache,
   handlers: handlers,
+  rules:    rules,
+  source:   source,
   types:    types
 }

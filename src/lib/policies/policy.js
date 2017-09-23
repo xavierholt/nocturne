@@ -1,4 +1,4 @@
-// Class with listeners for the WebRequest lifecycle.
+// Base class with listeners for the WebRequest lifecycle.
 // https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest
 
 module.exports = class Policy {

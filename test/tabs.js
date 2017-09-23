@@ -22,6 +22,12 @@ describe('tabs', function() {
       assert.strictEqual(tab.cache.get(ID).url.hostname, 'www.example.com')
       assert.strictEqual(tab.cache.get(ID).url.pathname, '/')
     })
+
+    it('should log what happened', function() {
+      assert.logs('debug', function() {
+        tab.handlers.onCreated(WWWREQ)
+      })
+    })
   })
 
   describe('#onUpdated()', function() {
@@ -33,7 +39,7 @@ describe('tabs', function() {
 
     it('should ignore tab changes without a URL diff', function() {
       assert.strictEqual(tab.cache.get(ID), undefined)
-      tab.handlers.onUpdated(ID, {changes: 'stuff'}, WWWREQ)
+      tab.handlers.onUpdated(ID, {changes: 'unrelated'}, WWWREQ)
       assert.strictEqual(tab.cache.get(ID), undefined)
     })
 
@@ -49,6 +55,18 @@ describe('tabs', function() {
       assert.strictEqual(tab.cache.get(ID).url.hostname, 'www.example.com')
       assert.strictEqual(tab.cache.get(ID).url.pathname, '/')
     })
+
+    it('should log if anything happened', function() {
+      assert.logs('debug', function() {
+        tab.handlers.onUpdated(ID, {url: 'https://www.example.com'}, WWWREQ)
+      })
+    })
+
+    it('should not log if nothing happened', function() {
+      assert.logs({debug: 0}, function() {
+        tab.handlers.onUpdated(ID, {changes: 'unrelated'}, WWWREQ)
+      })
+    })
   })
 
   describe('#onRemoved()', function() {
@@ -62,6 +80,12 @@ describe('tabs', function() {
     it('should not freak out if the tab is missing', function() {
       assert.strictEqual(tab.cache.get(ID), undefined)
       assert.doesNotThrow(function() {
+        tab.handlers.onRemoved(ID)
+      })
+    })
+
+    it('should log what happened', function() {
+      assert.logs('debug', function() {
         tab.handlers.onRemoved(ID)
       })
     })

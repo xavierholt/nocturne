@@ -1,6 +1,7 @@
+const logger = require('./logger.js')
+
 class Tab {
   constructor(tab) {
-    // this.tab = tab
     this.url = new URL(tab.url)
   }
 }
@@ -9,18 +10,18 @@ const cache = new Map()
 
 const handlers = {
   onCreated: function(tab) {
-    // console.debug(`Tab ${tab.id} created: ${tab.url}`)
+    logger.debug(`Tab ${tab.id} created.`, tab)
     cache.set(tab.id, new Tab(tab))
   },
 
   onRemoved: function(id, info) {
-    // console.debug(`Tab ${id} removed.`)
+    logger.debug(`Tab ${id} removed.`)
     cache.delete(id)
   },
 
   onUpdated: function(id, diff, tab) {
     if(diff.hasOwnProperty('url')) {
-      // console.debug(`Tab ${tab.id} updated: ${tab.url}`)
+      logger.debug(`Tab ${tab.id} updated.`, tab)
       cache.set(tab.id, new Tab(tab))
     }
   }

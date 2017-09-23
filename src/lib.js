@@ -1,7 +1,8 @@
-module.exports = {
-  Frie:     require('./lib/frie.js'),
-  parse:    require('./lib/parse.js'),
-  requests: require('./lib/requests.js'),
-  tabs:     require('./lib/tabs.js'),
-  types:    require('./lib/types.js')
+nocturne = {
+  Filter:  require('./lib/filter.js'),
+  Frie:    require('./lib/frie.js'),
+  logger:  require('./lib/logger.js'),
+  parse:   require('./lib/parse.js'),
+  request: require('./lib/request.js'),
+  tab:     require('./lib/tab.js')
 }

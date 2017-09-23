@@ -1,6 +1,6 @@
-const assert   = require('assert')
-const Filter   = require('../src/lib/filter.js')
-const policies = require('../src/lib/policies')
+const assert = require('assert')
+const Filter = require('../src/lib/filter.js')
+const policy = require('../src/lib/policy.js')
 
 let mocreq = function(headers) {
   return {
@@ -13,7 +13,7 @@ let mocreq = function(headers) {
 describe('Policy::Allow', function() {
   describe('#onBeforeRequest()', function() {
     it('should return undefined', function() {
-      let result = policies.ALLOW.onBeforeRequest({})
+      let result = policy.ALLOW.onBeforeRequest({})
       assert.strictEqual(result, undefined)
     })
   })
@@ -22,7 +22,7 @@ describe('Policy::Allow', function() {
 describe('Policy::Block', function() {
   describe('#onBeforeRequest()', function() {
     it('should block the request', function() {
-      let result = policies.BLOCK.onBeforeRequest({})
+      let result = policy.BLOCK.onBeforeRequest({})
       assert.deepEqual(result, {cancel: true})
     })
   })
@@ -30,7 +30,7 @@ describe('Policy::Block', function() {
   describe('#onSendHeaders()', function() {
     it('should log a warning', function() {
       assert.logs('warn', function() {
-        policies.BLOCK.onSendHeaders({})
+        policy.BLOCK.onSendHeaders({})
       })
     })
   })
@@ -39,13 +39,13 @@ describe('Policy::Block', function() {
 describe('Policy::Custom', function() {
   describe('#onBeforeSendHeaders()', function() {
     it('should allow headers', function() {
-      let policy = new policies.Custom({
+      let p = new policy.Custom({
         headers: new Filter('headers'),
         cookies: new Filter('cookies')
       })
 
       let request = mocreq({'User-Agent': '007'})
-      let result = policy.onBeforeSendHeaders(request)
+      let result = p.onBeforeSendHeaders(request)
       assert.deepEqual(result.requestHeaders, [{
         name:  'user-agent',
         value: '007'
@@ -53,24 +53,24 @@ describe('Policy::Custom', function() {
     })
 
     it('should block headers', function() {
-      let policy = new policies.Custom({
+      let p = new policy.Custom({
         headers: new Filter('headers', 'block'),
         cookies: new Filter('cookies')
       })
 
       let request = mocreq({'User-Agent': '007'})
-      let result = policy.onBeforeSendHeaders(request)
+      let result = p.onBeforeSendHeaders(request)
       assert.deepEqual(result.requestHeaders, [])
     })
 
     it('should override headers', function() {
-      let policy = new policies.Custom({
+      let p = new policy.Custom({
         headers: new Filter('headers', 'orange'),
         cookies: new Filter('cookies')
       })
 
       let request = mocreq({'User-Agent': '007'})
-      let result = policy.onBeforeSendHeaders(request)
+      let result = p.onBeforeSendHeaders(request)
       assert.deepEqual(result.requestHeaders, [{
         name:  'user-agent',
         value: 'orange'
@@ -78,13 +78,13 @@ describe('Policy::Custom', function() {
     })
 
     it('should allow cookies', function() {
-      let policy = new policies.Custom({
+      let p = new policy.Custom({
         headers: new Filter('headers'),
         cookies: new Filter('cookies')
       })
 
       let request = mocreq({'Cookie': 'favorite=macaron'})
-      let result = policy.onBeforeSendHeaders(request)
+      let result = p.onBeforeSendHeaders(request)
       assert.deepEqual(result.requestHeaders, [{
         name:  'cookie',
         value: 'favorite=macaron'
@@ -92,24 +92,24 @@ describe('Policy::Custom', function() {
     })
 
     it('should block all cookies', function() {
-      let policy = new policies.Custom({
+      let p = new policy.Custom({
         headers: new Filter('headers'),
         cookies: new Filter('cookies', 'block')
       })
 
       let request = mocreq({'Cookie': 'favorite=macaron'})
-      let result = policy.onBeforeSendHeaders(request)
+      let result = p.onBeforeSendHeaders(request)
       assert.deepEqual(result.requestHeaders, [])
     })
 
     it('should block single cookies', function() {
-      let policy = new policies.Custom({
+      let p = new policy.Custom({
         headers: new Filter('headers'),
         cookies: new Filter('cookies', 'allow', {dunkable: 'block'})
       })
 
       let request = mocreq({'Cookie': 'favorite=macaron; dunkable=false'})
-      let result = policy.onBeforeSendHeaders(request)
+      let result = p.onBeforeSendHeaders(request)
       assert.deepEqual(result.requestHeaders, [{
         name:  'cookie',
         value: 'favorite=macaron'
@@ -117,13 +117,13 @@ describe('Policy::Custom', function() {
     })
 
     it('should override cookies', function() {
-      let policy = new policies.Custom({
+      let p = new policy.Custom({
         headers: new Filter('headers'),
         cookies: new Filter('cookies', 'snickerdoodle')
       })
 
       let request = mocreq({'Cookie': 'favorite=macaron'})
-      let result = policy.onBeforeSendHeaders(request)
+      let result = p.onBeforeSendHeaders(request)
       assert.deepEqual(result.requestHeaders, [{
         name:  'cookie',
         value: 'favorite=snickerdoodle'
@@ -133,26 +133,26 @@ describe('Policy::Custom', function() {
 
   describe('#onSendHeaders()', function() {
     it('should verify headers', function() {
-      let policy = new policies.Custom({
+      let p = new policy.Custom({
         headers: new Filter('headers', 'block'),
         cookies: new Filter('cookies', 'allow')
       })
 
       let request = mocreq({'User-Agent': 'smith'})
       assert.logs('warn', function() {
-        policy.onSendHeaders(request)
+        p.onSendHeaders(request)
       })
     })
 
     it('should verify cookies', function() {
-      let policy = new policies.Custom({
+      let p = new policy.Custom({
         headers: new Filter('headers', 'allow'),
         cookies: new Filter('cookies', 'block')
       })
 
       let request = mocreq({'Cookie': 'favorite=macaron'})
       assert.logs('warn', function() {
-        policy.onSendHeaders(request)
+        p.onSendHeaders(request)
       })
     })
   })
@@ -161,16 +161,16 @@ describe('Policy::Custom', function() {
 describe('Policy::Policy', function() {
   describe('#[lifecycle]()', function() {
     it('should have all the WebRequest lifecycle hooks', function() {
-      let policy = new policies.Policy()
-      assert.strictEqual(policy.onAuthRequired(),      undefined)
-      assert.strictEqual(policy.onBeforeRedirect(),    undefined)
-      assert.strictEqual(policy.onBeforeRequest(),     undefined)
-      assert.strictEqual(policy.onBeforeSendHeaders(), undefined)
-      assert.strictEqual(policy.onCompleted(),         undefined)
-      assert.strictEqual(policy.onErrorOccurred(),     undefined)
-      assert.strictEqual(policy.onHeadersReceived(),   undefined)
-      assert.strictEqual(policy.onResponseStarted(),   undefined)
-      assert.strictEqual(policy.onSendHeaders(),       undefined)
+      let p = new policy.Policy()
+      assert.strictEqual(p.onAuthRequired(),      undefined)
+      assert.strictEqual(p.onBeforeRedirect(),    undefined)
+      assert.strictEqual(p.onBeforeRequest(),     undefined)
+      assert.strictEqual(p.onBeforeSendHeaders(), undefined)
+      assert.strictEqual(p.onCompleted(),         undefined)
+      assert.strictEqual(p.onErrorOccurred(),     undefined)
+      assert.strictEqual(p.onHeadersReceived(),   undefined)
+      assert.strictEqual(p.onResponseStarted(),   undefined)
+      assert.strictEqual(p.onSendHeaders(),       undefined)
     })
   })
 })

@@ -16,10 +16,17 @@ module.exports = class Filter {
 
     switch(action) {
     case 'allow':
+      logger.debug(`Allowed ${this.type}: ${kvp.name}`, kvp)
       return kvp.value
     case 'block':
+      logger.debug(`Blocked ${this.type}: ${kvp.name}`, kvp)
       return undefined
     default:
+      logger.debug(`Rewrote ${this.type}: ${kvp.name}`, {
+        name:     kvp.name,
+        oldvalue: kvp.value,
+        newvalue: action
+      })
       return action
     }
   }

@@ -17,8 +17,9 @@
 
   "background": {
     "scripts": [
-      "src/ext/chrome.js",
-      "src/app/main.js"
+      "dist/ext/browser.js",
+      "dist/lib.bundle.js",
+      "dist/app.bundle.js"
     ]
   },
 

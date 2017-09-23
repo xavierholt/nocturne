@@ -17,7 +17,7 @@ module.exports = class Ruleset {
     let d = (dst)? parse.url(dst) : [['?'], ['?']]
 
     let data = new Object()
-    this.root.glob(s.concat(d), x => {data = Object.assign(data, x)})
+    this.root.glob(s.concat(d), x => {Object.assign(data, x)})
     return data
   }
 }
