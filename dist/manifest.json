@@ -6,6 +6,14 @@
   "description":  "Fine-grained privacy control for Firefox.",
   "homepage_url": "https://github.com/xavierholt/nocturne",
 
+  "icons": {
+    "16":  "img/icon-16.png",
+    "32":  "img/icon-32.png",
+    "48":  "img/icon-48.png",
+    "96":  "img/icon-96.png",
+    "128": "img/icon-128.png"
+  },
+
   "permissions": [
     "http://*/",
     "https://*/",
@@ -17,9 +25,9 @@
 
   "background": {
     "scripts": [
-      "dist/ext/browser.js",
-      "dist/lib.bundle.js",
-      "dist/app.bundle.js"
+      "ext/browser-0.1.1.js",
+      "src/lib.min.js",
+      "src/app.min.js"
     ]
   },
 

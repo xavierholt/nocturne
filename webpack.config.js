@@ -9,8 +9,8 @@ module.exports = {
     lib: './src/lib.js'
   },
   output: {
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    filename: '[name].min.js',
+    path: path.resolve(__dirname, 'dist/src')
   },
   plugins: [
     new Babili()

@@ -145,10 +145,7 @@ describe('request', function() {
   describe('#onCompleted()', function() {
     it('should remove the request from the cache', function() {
       request.cache.set(REQID, null)
-      request.handlers.onCompleted({
-        requestId: REQID
-      })
-
+      request.handlers.onCompleted({requestId: REQID})
       assert(!request.cache.has(REQID))
     })
   })
@@ -156,10 +153,7 @@ describe('request', function() {
   describe('#onErrorOccurred()', function() {
     it('should remove the request from the cache', function() {
       request.cache.set(REQID, null)
-      request.handlers.onErrorOccurred({
-        requestId: REQID
-      })
-
+      request.handlers.onErrorOccurred({requestId: REQID})
       assert(!request.cache.has(REQID))
     })
   })

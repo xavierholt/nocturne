@@ -1,2 +1,2 @@
-# nocturne
-Fine-grained privacy control for Firefox.
+# Nocturne
+Fine-grained privacy control.
