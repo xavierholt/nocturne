@@ -3,13 +3,14 @@
   "name": "Nocturne",
   "version": "0.1.0",
 
-  "description":  "Fine-grained privacy control for Firefox.",
+  "description":  "Fine-grained privacy control.",
   "homepage_url": "https://github.com/xavierholt/nocturne",
 
   "icons": {
     "16":  "img/icon-16.png",
     "32":  "img/icon-32.png",
     "48":  "img/icon-48.png",
+    "64":  "img/icon-64.png",
     "96":  "img/icon-96.png",
     "128": "img/icon-128.png"
   },
@@ -32,7 +33,18 @@
   },
 
   "options_ui": {
-    "page": "src/gui/settings.html",
+    "page": "gui/settings.html",
     "open_in_tab": true
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "16":  "img/icon-16.png",
+      "32":  "img/icon-32.png",
+      "48":  "img/icon-48.png",
+      "64":  "img/icon-64.png",
+      "96":  "img/icon-96.png",
+      "128": "img/icon-128.png"
+    }
   }
 }

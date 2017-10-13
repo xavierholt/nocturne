@@ -4,8 +4,12 @@ const mocha  = require('mocha')
 const sinon  = require('sinon')
 
 before(function() {
-  // This would normally come from the browser...
-  if(typeof URL === 'undefined') URL = require('url').URL
+  // These would normally come from the browser...
+  if(typeof URL === 'undefined') {
+    const u = require('url')
+    URLSearchParams = u.URLSearchParams
+    URL = u.URL
+  }
 
   // Capture logging so we can test it.
   // Also it keeps our output pretty!

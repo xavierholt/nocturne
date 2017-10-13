@@ -23,55 +23,6 @@ describe('request', function() {
     return stub
   }
 
-  describe('#source()', function() {
-    it('should use the tab URL if it can', function() {
-      let src = request.source({
-        originUrl: EVIL,
-        requestId: REQID,
-        tabId:     TABID,
-        url:       GOOD
-      })
-
-      assert.deepEqual(src, new URL(FROM))
-    })
-
-    it('should log an error if the tab isn\'t cached', function() {
-      // Logs one error when it can't find the tab, and then another
-      // when it gives up and returns undefined.
-      assert.logs({error: 2}, function() {
-        request.source({
-          requestId: REQID,
-          tabId:     9.75,
-          url:       GOOD
-        })
-      })
-    })
-
-    it('should warn and use the origin URL if there is no tab', function() {
-      assert.logs('warn', function() {
-        let src = request.source({
-          originUrl: EVIL,
-          requestId: REQID,
-          tabId:     0,
-          url:       GOOD
-        })
-
-        assert.deepEqual(src, new URL(EVIL))
-      })
-    })
-
-    it('should log an error if it can\'t determine the source', function() {
-      assert.logs('error', function() {
-        let src = request.source({
-          requestId: REQID,
-          url:       GOOD
-        })
-
-        assert.strictEqual(src, undefined)
-      })
-    })
-  })
-
   describe('#onBeforeRequest()', function() {
     before(function() {
       request.rules.add('www.example.com', 'good.example.com', policy.ALLOW)
@@ -96,7 +47,7 @@ describe('request', function() {
     })
 
     it('should run a callback if there is one', function() {
-      //TODO (there should always be one)
+      // TODO (there should always be one)
     })
   })
 
@@ -155,6 +106,55 @@ describe('request', function() {
       request.cache.set(REQID, null)
       request.handlers.onErrorOccurred({requestId: REQID})
       assert(!request.cache.has(REQID))
+    })
+  })
+
+  describe('#source()', function() {
+    it('should use the tab URL if it can', function() {
+      let src = request.source({
+        originUrl: EVIL,
+        requestId: REQID,
+        tabId:     TABID,
+        url:       GOOD
+      })
+
+      assert.deepEqual(src, new URL(FROM))
+    })
+
+    it('should log an error if the tab isn\'t cached', function() {
+      // Logs one error when it can't find the tab, and then another
+      // when it gives up and returns undefined.
+      assert.logs({error: 2}, function() {
+        request.source({
+          requestId: REQID,
+          tabId:     9.75,
+          url:       GOOD
+        })
+      })
+    })
+
+    it('should warn and use the origin URL if there is no tab', function() {
+      assert.logs('warn', function() {
+        let src = request.source({
+          originUrl: EVIL,
+          requestId: REQID,
+          tabId:     0,
+          url:       GOOD
+        })
+
+        assert.deepEqual(src, new URL(EVIL))
+      })
+    })
+
+    it('should log an error if it can\'t determine the source', function() {
+      assert.logs('error', function() {
+        let src = request.source({
+          requestId: REQID,
+          url:       GOOD
+        })
+
+        assert.strictEqual(src, undefined)
+      })
     })
   })
 })

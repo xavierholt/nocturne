@@ -1,0 +1,169 @@
+const assert = require('assert')
+const Filter = require('../src/lib/filter.js')
+const Policy = require('../src/lib/policy.js')
+
+const SRC = 'http://src.example.com/'
+const DST = 'http://dst.example.com/?q=what'
+
+let mocreq = function(headers = {}) {
+  return {
+    url: 'http://dst.example.com/?q=what',
+    requestHeaders: Object.keys(headers).map(key => ({
+      name: key, value: headers[key]
+    }))
+  }
+}
+
+describe('Policy', function() {
+  describe('#constructor()', function() {
+    it('should be tested', function() {
+      assert.equal('TODO', true)
+    })
+  })
+
+  describe('#merge()', function() {
+    it('should be tested', function() {
+      assert.equal('TODO', true)
+    })
+  })
+
+  describe('#onBeforeRequest()', function() {
+    it('should not modify requests by default', function() {
+      let policy = new Policy(SRC, DST)
+      let result = policy.onBeforeRequest(mocreq())
+      assert.strictEqual(result, undefined)
+    })
+
+    it('should cancel requests if told to', function() {
+      let policy = new Policy(SRC, DST, {request: 'block'})
+      let result = policy.onBeforeRequest(mocreq())
+      assert.deepEqual(result, {cancel: true})
+    })
+
+    it('should redirect to HTTPS if told to', function() {
+      let policy = new Policy(SRC, DST, {encrypt: 'force'})
+      let result = policy.onBeforeRequest(mocreq())
+      assert.deepEqual(result, {
+        redirectUrl: 'https://dst.example.com/?q=what'
+      })
+    })
+
+    it('should block query params if told to', function() {
+      let policy = new Policy(SRC, DST, {queries: 'block'})
+      let result = policy.onBeforeRequest(mocreq())
+      assert.deepEqual(result, {
+        redirectUrl: 'http://dst.example.com/'
+      })
+    })
+
+    it('should rewrite queries if told to', function() {
+      let policy = new Policy(SRC, DST, {queries: 'who'})
+      let result = policy.onBeforeRequest(mocreq())
+      assert.deepEqual(result, {
+        redirectUrl: 'http://dst.example.com/?q=who'
+      })
+    })
+  })
+
+  describe('#onBeforeSendHeaders()', function() {
+    it('should allow headers by default', function() {
+      let policy = new Policy(SRC, DST, {
+        headers: new Filter('headers'),
+        cookies: new Filter('cookies')
+      })
+
+      let request = mocreq({'User-Agent': '007'})
+      let result = policy.onBeforeSendHeaders(request)
+      assert.deepEqual(result.requestHeaders, [{
+        name:  'user-agent',
+        value: '007'
+      }])
+    })
+
+    it('should block headers if told to', function() {
+      let policy  = new Policy(SRC, DST, {headers: 'block'})
+      let request = mocreq({'User-Agent': '007'})
+      let result  = policy.onBeforeSendHeaders(request)
+      assert.deepEqual(result.requestHeaders, [])
+    })
+
+    it('should override headers if told to', function() {
+      let policy  = new Policy(SRC, DST, {headers: 'orange'})
+      let request = mocreq({'User-Agent': '007'})
+      let result  = policy.onBeforeSendHeaders(request)
+      assert.deepEqual(result.requestHeaders, [{
+        name:  'user-agent',
+        value: 'orange'
+      }])
+    })
+
+    it('should allow cookies by default', function() {
+      let policy  = new Policy(SRC, DST)
+      let request = mocreq({'Cookie': 'favorite=macaron'})
+      let result  = policy.onBeforeSendHeaders(request)
+      assert.deepEqual(result.requestHeaders, [{
+        name:  'cookie',
+        value: 'favorite=macaron'
+      }])
+    })
+
+    it('should block all cookies if old to', function() {
+      let policy  = new Policy(SRC, DST, {cookies: 'block'})
+      let request = mocreq({'Cookie': 'favorite=macaron'})
+      let result  = policy.onBeforeSendHeaders(request)
+      assert.deepEqual(result.requestHeaders, [])
+    })
+
+    it('should block single cookies if told to', function() {
+      let policy  = new Policy(SRC, DST, {cookies: {dunkable: 'block'}})
+      let request = mocreq({'Cookie': 'favorite=macaron; dunkable=false'})
+      let result  = policy.onBeforeSendHeaders(request)
+      assert.deepEqual(result.requestHeaders, [{
+        name:  'cookie',
+        value: 'favorite=macaron'
+      }])
+    })
+
+    it('should override cookies if told to', function() {
+      let policy  = new Policy(SRC, DST, {cookies: 'snickerdoodle'})
+      let request = mocreq({'Cookie': 'favorite=macaron'})
+      let result  = policy.onBeforeSendHeaders(request)
+      assert.deepEqual(result.requestHeaders, [{
+        name:  'cookie',
+        value: 'favorite=snickerdoodle'
+      }])
+    })
+  })
+
+  describe('#onSendHeaders()', function() {
+    it('should flag requests that should have been blocked', function() {
+      let policy = new Policy(SRC, DST, {request: 'block'})
+      assert.logs('warn', function() {
+        policy.onSendHeaders(mocreq())
+      })
+    })
+
+    it('should flag requests that should have been encrypted', function() {
+      let policy = new Policy(SRC, DST, {encrypt: 'force'})
+      assert.logs('warn', function() {
+        policy.onSendHeaders(mocreq())
+      })
+    })
+
+    it('should flag requests with the wrong headers', function() {
+      let policy  = new Policy(SRC, DST, {headers: 'block'})
+      let request = mocreq({'User-Agent': 'smith'})
+      assert.logs('warn', function() {
+        policy.onSendHeaders(request)
+      })
+    })
+
+    it('should flag requests with the wrong cookies', function() {
+      let policy  = new Policy(SRC, DST, {cookies: 'block'})
+      let request = mocreq({'Cookie': 'favorite=macaron'})
+      assert.logs('warn', function() {
+        policy.onSendHeaders(request)
+      })
+    })
+  })
+})

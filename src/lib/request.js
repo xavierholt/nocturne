@@ -11,12 +11,8 @@ function source(request) {
     // NOTE: Potential race condition!
     // What's the tab URL of a main_frame request?
     let srctab = tab.cache.get(request.tabId)
-    if(srctab === undefined) {
-      logger.error('No such tab cached!', request)
-    }
-    else {
-      return srctab.url
-    }
+    if(srctab !== undefined) return srctab.url
+    logger.error('No such tab cached!', request)
   }
 
   if(request.originUrl) {
@@ -52,6 +48,7 @@ const handlers = {
   },
 
   onSendHeaders: function(request) {
+    // TODO: Only if validation is on!
     const pcy = cache.get(request.requestId)
     if(pcy === undefined) {
       // Theoretically unreachable...

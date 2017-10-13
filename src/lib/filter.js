@@ -1,14 +1,19 @@
 const logger = require('./logger.js')
 
 module.exports = class Filter {
-  constructor(type, dfault = 'allow', special = {}) {
+  constructor(type, general, special = {}) {
+    if(general instanceof Object) {
+      special = general
+      general = undefined
+    }
+
     this.type    = type
-    this.dfault  = dfault
+    this.general = general
     this.special = new Map(Object.entries(special))
   }
 
   action(kvp) {
-    return this.special.get(kvp.name) || this.dfault
+    return this.special.get(kvp.name) || this.general
   }
 
   filter(kvp) {
@@ -16,7 +21,7 @@ module.exports = class Filter {
 
     switch(action) {
     case 'allow':
-      logger.debug(`Allowed ${this.type}: ${kvp.name}`, kvp)
+    case undefined:
       return kvp.value
     case 'block':
       logger.debug(`Blocked ${this.type}: ${kvp.name}`, kvp)
@@ -31,12 +36,24 @@ module.exports = class Filter {
     }
   }
 
+  merge(other) {
+    if(other.general) {
+      this.general = other.general
+      this.special.clear()
+    }
+
+    other.special.forEach((v, k) => {
+      this.special.set(k, v)
+    })
+  }
+
   verify(kvp) {
     let action = this.action(kvp)
 
     switch(action) {
     case 'allow':
     case kvp.value:
+    case undefined:
       break
     case 'block':
       logger.warn(`Blocked ${this.type} sent: ${kvp.name}`)

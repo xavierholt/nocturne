@@ -2,7 +2,7 @@
   "name": "nocturne",
   "version": "0.1.0",
   "license": "GPL-3.0",
-  "description": "Fine-grained privacy control for Firefox.",
+  "description": "Fine-grained privacy control.",
   "keywords": [
     "web",
     "extension",
@@ -26,7 +26,7 @@
     "optipng": "latest",
     "sinon": "^3.3.0",
     "svgexport": "latest",
-    "webpack": "^3.6.0"
+    "webpack": "^3.7.1"
   },
   "scripts": {
     "benchmark": "node ./time/bench.js",
