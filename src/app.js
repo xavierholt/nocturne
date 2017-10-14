@@ -1,7 +1,7 @@
 // Hook up all our tab event handlers...
-browser.tabs.onCreated.addListener(tabs.handlers.onCreated)
-browser.tabs.onRemoved.addListener(tabs.handlers.onRemoved)
-browser.tabs.onUpdated.addListener(tabs.handlers.onUpdated)
+browser.tabs.onCreated.addListener(nocturne.tab.handlers.onCreated)
+browser.tabs.onRemoved.addListener(nocturne.tab.handlers.onRemoved)
+browser.tabs.onUpdated.addListener(nocturne.tab.handlers.onUpdated)
 
 // ...figure out what tabs are already open...
 browser.tabs.query({}).then(function(tabs) {
@@ -18,11 +18,11 @@ browser.tabs.query({}).then(function(tabs) {
 })
 
 // ...and then start listening for requests!
-function attach(name, flags) {
+function attach(name, ...flags) {
   browser.webRequest[name].addListener(
     nocturne.request.handlers[name],
     {urls: ['<all_urls>']},
-    flags
+    ...flags
   )
 }
 
@@ -30,5 +30,6 @@ attach('onBeforeRequest',     ['blocking'])
 attach('onBeforeSendHeaders', ['blocking', 'requestHeaders'])
 attach('onSendHeaders',       ['requestHeaders'])
 attach('onHeadersReceived',   ['blocking', 'responseHeaders'])
-attach('onCompleted',         [])
-attach('onErrorOccurred',     [])
+
+attach('onCompleted')
+attach('onErrorOccurred')
