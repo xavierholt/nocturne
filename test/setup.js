@@ -13,31 +13,27 @@ before(function() {
 
   // Capture logging so we can test it.
   // Also it keeps our output pretty!
-  logger.level   = logger.levels.debug
-  logger.backend = {
-    debug: sinon.stub(),
-    log:   sinon.stub(),
-    warn:  sinon.stub(),
-    error: sinon.stub(),
-
-    reset: function() {
-      this.debug.reset()
-      this.log.reset()
-      this.warn.reset()
-      this.error.reset()
-    }
+  logger.debug = sinon.stub(),
+  logger.log   = sinon.stub(),
+  logger.warn  = sinon.stub(),
+  logger.error = sinon.stub(),
+  logger.reset = function() {
+    this.debug.reset()
+    this.log.reset()
+    this.warn.reset()
+    this.error.reset()
   }
 })
 
 assert.logs = function(counts, callback) {
-  logger.backend.reset()
+  logger.reset()
   let result = callback()
 
   if(typeof counts === 'string') counts = {[counts]: 1}
-  assert.strictEqual(logger.backend.debug.callCount, counts.debug || 0, 'wrong number of debug logs')
-  assert.strictEqual(logger.backend.log.callCount,   counts.log   || 0, 'wrong number of normal logs')
-  assert.strictEqual(logger.backend.warn.callCount,  counts.warn  || 0, 'wrong number of warning logs')
-  assert.strictEqual(logger.backend.error.callCount, counts.error || 0, 'wrong number of error logs')
+  assert.strictEqual(logger.debug.callCount, counts.debug || 0, 'wrong number of debug logs')
+  assert.strictEqual(logger.log.callCount,   counts.log   || 0, 'wrong number of normal logs')
+  assert.strictEqual(logger.warn.callCount,  counts.warn  || 0, 'wrong number of warning logs')
+  assert.strictEqual(logger.error.callCount, counts.error || 0, 'wrong number of error logs')
 
   return result
 }

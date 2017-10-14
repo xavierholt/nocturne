@@ -33,6 +33,7 @@ const handlers = {
     let pcy = rules.get(src, dst)
 
     cache.set(request.requestId, pcy)
+    logger.debug(`Request ${request.requestId} (${request.type}): ${src? src.hostname:undefined} -> ${dst.hostname}`)
     return pcy.onBeforeRequest(request)
   },
 
