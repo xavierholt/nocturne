@@ -65,18 +65,6 @@ describe('parse', function() {
       ])
     })
 
-    // This isn't a "production" feature, but it's very useful for testing.
-    it('should expand terminal **s to arbitrary strings', function() {
-      parse.glob = 'cats'
-      let url = '**.example.com/path/to/**'
-      assert.deepEqual(parse.rule(url, 'cats'), [
-        ['com', 'example', 'cats'],
-        ['path', 'to', 'cats']
-      ])
-
-      parse.glob = '***'
-    })
-
     it('should not expand inner **s', function() {
       let url = 'www.**.com/path/**/file.txt'
       assert.deepEqual(parse.rule(url), [

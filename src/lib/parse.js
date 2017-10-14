@@ -24,11 +24,10 @@ function cookies(input) {
 function rule(input) {
   let path = input.split('/')
   let host = path.shift().split('.').reverse()
-  let glob = module.exports.glob
 
-  if(path.length === 0) path.push(glob)
-  if(path[path.length-1] === '**') path[path.length-1] = glob
-  if(host[host.length-1] === '**') host[host.length-1] = glob
+  if(path.length === 0) path.push('***')
+  if(path[path.length-1] === '**') path[path.length-1] = '***'
+  if(host[host.length-1] === '**') host[host.length-1] = '***'
   return [host, path]
 }
 
@@ -40,7 +39,6 @@ function url(input) {
 
 module.exports = {
   cookies: cookies,
-  glob:    '***',
   rule:    rule,
   url:     url
 }
