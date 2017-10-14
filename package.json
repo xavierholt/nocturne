@@ -32,6 +32,7 @@
     "benchmark": "node ./time/bench.js",
     "build": "webpack",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha",
+    "frie-coverage": "istanbul cover ./node_modules/mocha/bin/_mocha test/frie.js",
     "test": "mocha"
   }
 }

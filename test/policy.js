@@ -11,6 +11,15 @@ let mocreq = function(headers = {}) {
   }
 }
 
+let mocrsp = function(headers = {}) {
+  return {
+    url: 'http://dst.example.com/?q=what',
+    responseHeaders: Object.keys(headers).map(key => ({
+      name: key, value: headers[key]
+    }))
+  }
+}
+
 describe('Policy', function() {
   describe('#constructor()', function() {
     it('should be tested', function() {
@@ -128,6 +137,27 @@ describe('Policy', function() {
       assert.deepEqual(result.requestHeaders, [{
         name:  'cookie',
         value: 'favorite=snickerdoodle'
+      }])
+    })
+  })
+
+  describe('#onHeadersReceived()', function() {
+    it('should do nothing by default', function() {
+      let policy = new Policy()
+      let result = policy.onHeadersReceived(mocrsp())
+      assert.deepEqual(result.responseHeaders, [])
+    })
+
+    it('should have cookie tests', function() {
+      assert.equal('TODO', true)
+    })
+
+    it('should block all scripts if told to', function() {
+      let policy = new Policy({scripts: 'block'})
+      let result = policy.onHeadersReceived(mocrsp())
+      assert.deepEqual(result.responseHeaders, [{
+        name:  'content-security-policy',
+        value: 'script-src \'none\''
       }])
     })
   })

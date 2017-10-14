@@ -1,6 +1,5 @@
-const Babili  = require('babili-webpack-plugin')
-const webpack = require('webpack')
-const path    = require('path')
+const Babili = require('babili-webpack-plugin')
+const path   = require('path')
 
 module.exports = {
   entry: {
@@ -10,7 +9,7 @@ module.exports = {
   },
   output: {
     filename: '[name].min.js',
-    path: path.resolve(__dirname, 'dist/src')
+    path: path.resolve(__dirname, 'dist', 'src')
   },
   plugins: [
     new Babili()

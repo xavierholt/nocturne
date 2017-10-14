@@ -13,10 +13,10 @@ before(function() {
 
   // Capture logging so we can test it.
   // Also it keeps our output pretty!
-  logger.debug = sinon.stub(),
-  logger.log   = sinon.stub(),
-  logger.warn  = sinon.stub(),
-  logger.error = sinon.stub(),
+  logger.debug = sinon.stub()
+  logger.log   = sinon.stub()
+  logger.warn  = sinon.stub()
+  logger.error = sinon.stub()
   logger.reset = function() {
     this.debug.reset()
     this.log.reset()

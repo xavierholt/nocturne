@@ -136,10 +136,10 @@ module.exports = class Policy {
     }
 
     if(this.scripts === 'block') {
-      logger.debug('Blocked scripts.', request)
+      logger.debug('Blocked scripts.', response)
       headers.push({
         name:  'content-security-policy',
-        value: 'srcipt-src \'none\''
+        value: 'script-src \'none\''
       })
     }
 

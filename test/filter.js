@@ -16,9 +16,10 @@ describe('Filter', function() {
     it('should accept a specified default', function() {
       let filter = new Filter('dummy', 'hello')
       assert.strictEqual(filter.general, 'hello')
+      assert.strictEqual(filter.special.size, 0)
     })
 
-    it('should accept special cases', function() {
+    it('should accept a default and special cases', function() {
       let filter = new Filter('dummy', 'hello', {special: 'case'})
       assert.strictEqual(filter.special.size, 1)
       assert.strictEqual(filter.special.get('special'), 'case')
