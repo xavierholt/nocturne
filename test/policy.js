@@ -73,17 +73,10 @@ describe('Policy', function() {
 
   describe('#onBeforeSendHeaders()', function() {
     it('should allow headers by default', function() {
-      let policy = new Policy({
-        headers: new Filter('headers'),
-        cookies: new Filter('cookies')
-      })
-
+      let policy  = new Policy()
       let request = mocreq({'User-Agent': '007'})
-      let result = policy.onBeforeSendHeaders(request)
-      assert.deepEqual(result.requestHeaders, [{
-        name:  'user-agent',
-        value: '007'
-      }])
+      let result  = policy.onBeforeSendHeaders(request)
+      assert.strictEqual(result, undefined)
     })
 
     it('should block headers if told to', function() {
@@ -107,10 +100,7 @@ describe('Policy', function() {
       let policy  = new Policy()
       let request = mocreq({'Cookie': 'favorite=macaron'})
       let result  = policy.onBeforeSendHeaders(request)
-      assert.deepEqual(result.requestHeaders, [{
-        name:  'cookie',
-        value: 'favorite=macaron'
-      }])
+      assert.strictEqual(result, undefined)
     })
 
     it('should block all cookies if old to', function() {
@@ -145,7 +135,7 @@ describe('Policy', function() {
     it('should do nothing by default', function() {
       let policy = new Policy()
       let result = policy.onHeadersReceived(mocrsp())
-      assert.deepEqual(result.responseHeaders, [])
+      assert.strictEqual(result, undefined)
     })
 
     it('should have cookie tests', function() {

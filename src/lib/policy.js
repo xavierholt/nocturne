@@ -31,12 +31,11 @@ module.exports = class Policy {
       return {cancel: true}
     }
 
-    let dst      = new URL(request.url)
-    let target   = new URL(request.url)
+    let dst = new URL(request.url)
     let redirect = false
 
     if(this.encrypt === 'force' && dst.protocol === 'http:') {
-      target.protocol = 'https:'
+      dst.protocol = 'https:'
       redirect = true
     }
 
@@ -50,12 +49,12 @@ module.exports = class Policy {
     }
 
     if(change) {
-      target.search = params.toString()
+      dst.search = params.toString()
       redirect = true
     }
 
     if(redirect) {
-      request.newurl = target.toString()
+      request.newurl = dst.toString()
       logger.debug('Redirected request.', request)
       return {redirectUrl: request.newurl}
     }
@@ -63,6 +62,8 @@ module.exports = class Policy {
 
   onBeforeSendHeaders(request) {
     let headers = []
+    let changed = false
+
     for(const header of request.requestHeaders) {
       header.name = header.name.toLowerCase()
 
@@ -71,6 +72,7 @@ module.exports = class Policy {
         for(const cookie of parse.cookies(header.value)) {
           let val = this.cookies.filter(cookie)
           if(val) cookies.push(`${cookie.name}=${val}`)
+          changed = changed || val !== cookie.value
         }
 
         if(cookies.length > 0) {
@@ -80,16 +82,18 @@ module.exports = class Policy {
       else {
         let val = this.headers.filter(header)
         if(val) headers.push({name: header.name, value: val})
+        changed = changed || val !== header.value
       }
     }
 
-    return {
+    if(changed) return {
       requestHeaders: headers
     }
   }
 
   onSendHeaders(request) {
     const dst = new URL(request.url)
+
     if(this.request === 'block') {
       logger.warn('Blocked request sent!', request)
       return
@@ -120,6 +124,8 @@ module.exports = class Policy {
 
   onHeadersReceived(response) {
     let headers = []
+    let changed = false
+
     for(const header of response.responseHeaders) {
       header.name = header.name.toLowerCase()
 
@@ -127,6 +133,9 @@ module.exports = class Policy {
         // TODO: Make this do something useful.
         if(this.cookies !== 'block') {
           headers.push(header)
+        }
+        else {
+          changed = true
         }
       }
       else {
@@ -136,6 +145,7 @@ module.exports = class Policy {
     }
 
     if(this.scripts === 'block') {
+      changed = true
       logger.debug('Blocked scripts.', response)
       headers.push({
         name:  'content-security-policy',
@@ -143,7 +153,7 @@ module.exports = class Policy {
       })
     }
 
-    return {
+    if(changed) return {
       responseHeaders: headers
     }
   }
