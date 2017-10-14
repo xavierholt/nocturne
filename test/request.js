@@ -1,5 +1,5 @@
 const assert  = require('assert')
-const policy  = require('../src/lib/policy.js')
+const Policy  = require('../src/lib/policy.js')
 const request = require('../src/lib/request.js')
 const Ruleset = require('../src/lib/ruleset.js')
 const sinon   = require('sinon')
@@ -25,8 +25,8 @@ describe('request', function() {
 
   describe('#onBeforeRequest()', function() {
     before(function() {
-      request.rules.add('www.example.com', 'good.example.com', policy.ALLOW)
-      request.rules.add('www.example.com', 'evil.example.com', policy.BLOCK)
+      request.rules.add('www.example.com', 'good.example.com', new Policy({request: 'allow'}))
+      request.rules.add('www.example.com', 'evil.example.com', new Policy({request: 'block'}))
       tab.cache.set(TABID, {url: new URL(FROM)})
     })
 
@@ -43,7 +43,7 @@ describe('request', function() {
       })
 
       let pcy = request.cache.get(REQID)
-      assert.deepEqual(pcy, policy.ALLOW)
+      assert.deepEqual(pcy.request, 'allow')
     })
 
     it('should run a callback if there is one', function() {
@@ -96,6 +96,7 @@ describe('request', function() {
   describe('#onCompleted()', function() {
     it('should remove the request from the cache', function() {
       request.cache.set(REQID, null)
+      assert(request.cache.has(REQID))
       request.handlers.onCompleted({requestId: REQID})
       assert(!request.cache.has(REQID))
     })
@@ -104,6 +105,7 @@ describe('request', function() {
   describe('#onErrorOccurred()', function() {
     it('should remove the request from the cache', function() {
       request.cache.set(REQID, null)
+      assert(request.cache.has(REQID))
       request.handlers.onErrorOccurred({requestId: REQID})
       assert(!request.cache.has(REQID))
     })

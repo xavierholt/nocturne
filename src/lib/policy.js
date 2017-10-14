@@ -3,10 +3,7 @@ const logger = require('./logger.js')
 const parse  = require('./parse.js')
 
 module.exports = class Policy {
-  constructor(src, dst, options = {}) {
-    this.src     = src
-    this.dst     = dst
-
+  constructor(options = {}) {
     this.cookies = new Filter('cookie', options.cookies)
     this.headers = new Filter('header', options.headers)
     this.queries = new Filter('query',  options.queries)
