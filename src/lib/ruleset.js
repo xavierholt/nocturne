@@ -4,13 +4,17 @@ const Policy = require('./policy.js')
 
 module.exports = class Ruleset {
   constructor() {
-    this.root = new Frie()
+    this.clear()
   }
 
   add(src, dst, policy) {
     let s = parse.rule(src)
     let d = parse.rule(dst)
     this.root.set(s.concat(d), policy)
+  }
+
+  clear() {
+    this.root = new Frie()
   }
 
   get(src, dst) {

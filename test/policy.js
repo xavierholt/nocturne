@@ -138,8 +138,42 @@ describe('Policy', function() {
       assert.strictEqual(result, undefined)
     })
 
-    it('should have cookie tests', function() {
-      assert.equal('TODO', true)
+    it('should allow all headers by default', function() {
+      let policy = new Policy()
+      let result = policy.onHeadersReceived(mocrsp({'X-Y-Z': '123'}))
+      assert.strictEqual(result, undefined)
+    })
+
+    it('should allow cookies by default', function() {
+      let policy = new Policy()
+      let result = policy.onHeadersReceived(mocrsp({
+        'Set-Cookie': 'favorite=chocolate-chip; Path=/; Secure'
+      }))
+
+      assert.strictEqual(result, undefined)
+    })
+
+    it('should block cookies if told to', function() {
+      let policy = new Policy({cookies: 'block'})
+      let result = policy.onHeadersReceived(mocrsp({
+        'Set-Cookie': 'favorite=chocolate-chip; Path=/; Secure'
+      }))
+
+      assert.deepEqual(result, {
+        responseHeaders: []
+      })
+    })
+
+    it('should rewrite cookies if told to', function() {
+      let policy = new Policy( {cookies: 'gingersnaps'})
+      let result = policy.onHeadersReceived(mocrsp({
+        'Set-Cookie': 'favorite=chocolate-chip; Path=/; Secure; HttpOnly'
+      }))
+
+      assert.deepEqual(result, {responseHeaders: [{
+        name:  'set-cookie',
+        value: 'favorite=gingersnaps; Path=/; Secure; HttpOnly'
+      }]})
     })
 
     it('should block all scripts if told to', function() {

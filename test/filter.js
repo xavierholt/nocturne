@@ -1,7 +1,7 @@
 const assert = require('assert')
 const Filter = require('../src/lib/filter.js')
 
-describe('Filter', function() {
+context('Filter', function() {
   describe('#constructor()', function() {
     it('should have a default of undefined', function() {
       let filter = new Filter('dummy')
@@ -31,19 +31,45 @@ describe('Filter', function() {
       assert.strictEqual(filter.special.get('special'), 'case')
       assert.strictEqual(filter.general, undefined)
     })
+
+    it('should not allow special cases that are undefined', function() {
+      let filter = new Filter('dummy', 'hello', {special: undefined})
+      assert.strictEqual(filter.special.has('special'), false)
+    })
+
+    it('should not allow special cases that match the default', function() {
+      let filter = new Filter('dummy', 'hello', {special: 'hello'})
+      assert.strictEqual(filter.special.has('special'), false)
+    })
   })
 
   describe('#action()', function() {
-    it('should return the default by default', function() {
+    it('should return the default when given a pair', function() {
       let filter = new Filter('dummy', 'san andreas')
       let result = filter.action({name: 'bob', value: 'smith'})
       assert.strictEqual(result, 'san andreas')
     })
 
-    it('should return a special case if applicable', function() {
+    it('should return a special case if it applies to a pair', function() {
       let filter = new Filter('dummy', 'san andreas', {bob: 'special'})
       let result = filter.action({name: 'bob', value: 'smith'})
       assert.strictEqual(result, 'special')
+    })
+
+    it('should return the default if no special case applies to a pair', function() {
+      let filter = new Filter('dummy', 'default', {bob: 'special'})
+      let result = filter.action({name: 'alice', value: 'smith'})
+      assert.strictEqual(result, 'default')
+    })
+
+    it('should return the default if there are no special cases', function() {
+      let filter = new Filter('dummy', 'san andreas')
+      assert.strictEqual(filter.action(), 'san andreas')
+    })
+
+    it('should return undefined if there are special cases', function() {
+      let filter = new Filter('dummy', 'foot', {special: 'case'})
+      assert.strictEqual(filter.action(), undefined)
     })
   })
 
@@ -92,6 +118,18 @@ describe('Filter', function() {
       filter.merge(new Filter('other', 'colonel', {special: 'case'}))
       assert.strictEqual(filter.special.get('special'), 'case')
       assert.strictEqual(filter.special.has('magical'), false)
+    })
+
+    it('should not add special cases that match the default', function() {
+      let filter = new Filter('dummy', 'general')
+      filter.merge(new Filter('other', undefined, {surgeon: 'general'}))
+      assert.strictEqual(filter.special.has('surgeon'), false)
+    })
+
+    it('should clear special cases that match the new default', function() {
+      let filter = new Filter('dummy', 'default', {magical: 'mushrooms'})
+      filter.merge(new Filter('other', 'mushrooms'))
+      assert.strictEqual(filter.special.has('mushrooms'), false)
     })
   })
 

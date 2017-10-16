@@ -17,6 +17,14 @@ before(function() {
   logger.log   = sinon.stub()
   logger.warn  = sinon.stub()
   logger.error = sinon.stub()
+
+  logger.check = function(counts = {}) {
+    assert.strictEqual(logger.debug.callCount, counts.debug || 0, 'wrong number of debug logs')
+    assert.strictEqual(logger.log.callCount,   counts.log   || 0, 'wrong number of normal logs')
+    assert.strictEqual(logger.warn.callCount,  counts.warn  || 0, 'wrong number of warning logs')
+    assert.strictEqual(logger.error.callCount, counts.error || 0, 'wrong number of error logs')
+  }
+
   logger.reset = function() {
     this.debug.reset()
     this.log.reset()
@@ -25,15 +33,17 @@ before(function() {
   }
 })
 
+// Test all logging?
+// afterEach(function() {
+//   logger.check()
+//   logger.reset()
+// })
+
 assert.logs = function(counts, callback) {
   logger.reset()
   let result = callback()
 
   if(typeof counts === 'string') counts = {[counts]: 1}
-  assert.strictEqual(logger.debug.callCount, counts.debug || 0, 'wrong number of debug logs')
-  assert.strictEqual(logger.log.callCount,   counts.log   || 0, 'wrong number of normal logs')
-  assert.strictEqual(logger.warn.callCount,  counts.warn  || 0, 'wrong number of warning logs')
-  assert.strictEqual(logger.error.callCount, counts.error || 0, 'wrong number of error logs')
-
+  logger.check(counts)
   return result
 }

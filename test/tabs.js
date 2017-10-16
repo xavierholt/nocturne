@@ -2,92 +2,96 @@ const assert = require('assert')
 const tab    = require('../src/lib/tab.js')
 
 describe('tabs', function() {
-  beforeEach(function() {
+  afterEach(function() {
     tab.cache.clear()
   })
 
-  const ID     = 42
-  const WWWREQ = {id: ID, url: 'https://www.example.com'}
-  const APIREQ = {id: ID, url: 'https://api.example.com'}
+  before(function() {
+    tab.cache.clear()
+  })
 
-  describe('#onCreated()', function() {
+  describe('#del()', function() {
+    it('should remove existing tabs from the cache', function() {
+      tab.cache.set('marco', 'polo')
+      assert.strictEqual(tab.cache.get('marco'), 'polo')
+
+      assert.logs('debug', function() {tab.del('marco')})
+      assert.strictEqual(tab.cache.get('marco'), undefined)
+    })
+
+    it('should do nothing if no such tab exists', function() {
+      assert.strictEqual(tab.cache.get('nope'), undefined)
+
+      assert.logs('none', function() {tab.del('nope')})
+      assert.strictEqual(tab.cache.get('nope'), undefined)
+    })
+  })
+
+  describe('#get()', function() {
+    it('should retrieve tabs from the cache', function() {
+      tab.cache.set('heave', 'ho')
+      assert.strictEqual(tab.get('heave'), 'ho')
+    })
+
+    it('should return undefined if there\'s nothing there', function() {
+      assert.strictEqual(tab.get('anybody..?'), undefined)
+    })
+  })
+
+  describe('#set()', function() {
     it('should add new tabs to the cache', function() {
-      assert.strictEqual(tab.cache.get(ID), undefined)
-      tab.handlers.onCreated(WWWREQ)
-      assert.notStrictEqual(tab.cache.get(ID), undefined)
+      assert.strictEqual(tab.cache.has('example'), false)
+
+      tab.set('example', 'https://www.example.com')
+      assert(tab.cache.has('example'))
     })
 
-    it('should parse the URLs of new tabs', function() {
-      tab.handlers.onCreated(WWWREQ)
-      assert.strictEqual(tab.cache.get(ID).url.hostname, 'www.example.com')
-      assert.strictEqual(tab.cache.get(ID).url.pathname, '/')
+    it('should overwrite tabs when the scheme changes', function() {
+      assert.logs('debug', () => tab.set('id', 'http://www.example.com'))
+      assert.strictEqual(tab.cache.get('id').url.protocol, 'http:')
+
+      assert.logs('debug', () => tab.set('id', 'https://www.example.com'))
+      assert.strictEqual(tab.cache.get('id').url.protocol, 'https:')
     })
 
-    it('should log what happened', function() {
-      assert.logs('debug', function() {
-        tab.handlers.onCreated(WWWREQ)
-      })
-    })
-  })
+    it('should overwrite tabs when the host changes', function() {
+      assert.logs('debug', () => tab.set('id', 'https://www.example.com'))
+      assert.strictEqual(tab.cache.get('id').url.hostname, 'www.example.com')
 
-  describe('#onUpdated()', function() {
-    it('should add new tabs if they have URL diffs', function() {
-      assert.strictEqual(tab.cache.get(ID), undefined)
-      tab.handlers.onUpdated(ID, {url: 'https://www.example.com'}, WWWREQ)
-      assert.notStrictEqual(tab.cache.get(ID), undefined)
+      assert.logs('debug', () => tab.set('id', 'https://xxx.example.com'))
+      assert.strictEqual(tab.cache.get('id').url.hostname, 'xxx.example.com')
     })
 
-    it('should ignore tab changes without a URL diff', function() {
-      assert.strictEqual(tab.cache.get(ID), undefined)
-      tab.handlers.onUpdated(ID, {changes: 'unrelated'}, WWWREQ)
-      assert.strictEqual(tab.cache.get(ID), undefined)
+    it('should overwrite tabs when the port changes', function() {
+      assert.logs('debug', () => tab.set('id', 'https://www.example.com:42'))
+      assert.strictEqual(tab.cache.get('id').url.port, '42')
+
+      assert.logs('debug', () => tab.set('id', 'https://www.example.com:88'))
+      assert.strictEqual(tab.cache.get('id').url.port, '88')
     })
 
-    it('should replace existing tabs if they have URL diffs', function() {
-      tab.handlers.onCreated(WWWREQ)
-      assert.notStrictEqual(tab.cache.get(ID), undefined)
-      tab.handlers.onUpdated(ID, {url: 'https://api.example.com'}, APIREQ)
-      assert.notStrictEqual(tab.cache.get(ID), undefined)
+    it('should overwrite tabs when the path changes', function() {
+      assert.logs('debug', () => tab.set('id', 'https://www.example.com/heaven'))
+      assert.strictEqual(tab.cache.get('id').url.pathname, '/heaven')
+
+      assert.logs('debug', () => tab.set('id', 'https://www.example.com/earth'))
+      assert.strictEqual(tab.cache.get('id').url.pathname, '/earth')
     })
 
-    it('should parse the URLs of updated tabs', function() {
-      tab.handlers.onUpdated(ID, {url: 'https://www.example.com'}, WWWREQ)
-      assert.strictEqual(tab.cache.get(ID).url.hostname, 'www.example.com')
-      assert.strictEqual(tab.cache.get(ID).url.pathname, '/')
+    it('should not overwrite tabs when only the hash changes', function() {
+      assert.logs('debug', () => tab.set('id', 'https://www.example.com#tags'))
+      assert.strictEqual(tab.cache.get('id').url.hash, '#tags')
+
+      assert.logs('none', () => tab.set('id', 'https://www.example.com#cats'))
+      assert.strictEqual(tab.cache.get('id').url.hash, '#tags')
     })
 
-    it('should log if anything happened', function() {
-      assert.logs('debug', function() {
-        tab.handlers.onUpdated(ID, {url: 'https://www.example.com'}, WWWREQ)
-      })
-    })
+    it('should not overwrite tabs when only the query changes', function() {
+      assert.logs('debug', () => tab.set('id', 'https://www.example.com?q=who'))
+      assert.strictEqual(tab.cache.get('id').url.search, '?q=who')
 
-    it('should not log if nothing happened', function() {
-      assert.logs({debug: 0}, function() {
-        tab.handlers.onUpdated(ID, {changes: 'unrelated'}, WWWREQ)
-      })
-    })
-  })
-
-  describe('#onRemoved()', function() {
-    it('should remove tabs from the cache', function() {
-      tab.handlers.onCreated(WWWREQ)
-      assert.notStrictEqual(tab.cache.get(ID), undefined)
-      tab.handlers.onRemoved(ID)
-      assert.strictEqual(tab.cache.get(ID), undefined)
-    })
-
-    it('should not freak out if the tab is missing', function() {
-      assert.strictEqual(tab.cache.get(ID), undefined)
-      assert.doesNotThrow(function() {
-        tab.handlers.onRemoved(ID)
-      })
-    })
-
-    it('should log what happened', function() {
-      assert.logs('debug', function() {
-        tab.handlers.onRemoved(ID)
-      })
+      assert.logs('none', () => tab.set('id', 'https://www.example.com?q=why'))
+      assert.strictEqual(tab.cache.get('id').url.search, '?q=who')
     })
   })
 })

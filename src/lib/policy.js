@@ -1,6 +1,7 @@
 const Filter = require('./filter.js')
 const logger = require('./logger.js')
 const parse  = require('./parse.js')
+const tab    = require('./tab.js')
 
 module.exports = class Policy {
   constructor(options = {}) {
@@ -126,21 +127,23 @@ module.exports = class Policy {
     let headers = []
     let changed = false
 
+    // if(response.type === 'main_frame') {
+    //   tab.set(response.tabId, response.url)
+    // }
+
     for(const header of response.responseHeaders) {
       header.name = header.name.toLowerCase()
 
       if(header.name === 'set-cookie') {
-        // TODO: Make this do something useful.
-        if(this.cookies !== 'block') {
-          headers.push(header)
+        let cookie = parse.setCookie(header.value)
+        let val = this.cookies.filter(cookie)
+        changed = changed || val !== cookie.value
+
+        if(val !== undefined) {
+          let a = [cookie.name + '=' + val]
+          let b = a.concat(cookie.flags).join('; ')
+          headers.push({name: 'set-cookie', value: b})
         }
-        else {
-          changed = true
-        }
-      }
-      else {
-        // TODO: More filtering?
-        headers.push(header)
       }
     }
 

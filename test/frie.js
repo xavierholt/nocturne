@@ -3,20 +3,14 @@ const Frie   = require('../src/lib/frie.js')
 
 describe('Frie', function() {
   let make = function(first, second = undefined) {
+    let data = (second !== undefined)? [[first, second]]: first
     let frie = new Frie()
-    if(second === undefined) {
-      // Shuffle to guard against insertion order bugs:
-      for(let i = first.length; i > 0; --i) {
-        let j = Math.floor(Math.random() * i)
-        let t = first[i - 1]
-        first[i - 1] = first[j]
-        first[j] = t
-      }
 
-      first.forEach(pair => frie.set(pair[0], pair[1]))
-    }
-    else {
-      frie.set(first, second)
+    // Shuffle to guard against insertion order bugs:
+    for(let i = data.length; i > 0; --i) {
+      let j = Math.floor(Math.random() * i)
+      frie.set(data[j][0], data[j][1])
+      data[j] = data[i - 1]
     }
 
     return frie
@@ -291,6 +285,8 @@ describe('Frie', function() {
       let path = [['a'], ['b']]
 
       frie.set(path, 'hello')
+      assert.strictEqual(frie.get(path), 'hello')
+
       frie.set(path, 'goodbye')
       assert.strictEqual(frie.get(path), 'goodbye')
     })

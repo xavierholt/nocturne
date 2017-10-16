@@ -9,11 +9,24 @@ module.exports = class Filter {
 
     this.type    = type
     this.general = general
-    this.special = new Map(Object.entries(special))
+    this.special = new Map()
+    for(const [k, v] of Object.entries(special)) {
+      if(v === undefined) continue
+      if(v === general) continue
+      this.special.set(k, v)
+    }
   }
 
-  action(kvp) {
-    return this.special.get(kvp.name) || this.general
+  action(kvp = undefined) {
+    if(kvp !== undefined) {
+      return this.special.get(kvp.name) || this.general
+    }
+    else if(this.special.size === 0) {
+      return this.general
+    }
+    else {
+      return undefined
+    }
   }
 
   filter(kvp) {
@@ -43,6 +56,7 @@ module.exports = class Filter {
     }
 
     other.special.forEach((v, k) => {
+      if(v === this.general) return
       this.special.set(k, v)
     })
   }
@@ -59,7 +73,7 @@ module.exports = class Filter {
       logger.warn(`Blocked ${this.type} sent: ${kvp.name}`)
       break
     default:
-      logger.warn(`Override failed for ${this.type} ${kvp.name}!`, {
+      logger.warn(`Override failed for ${this.type}: ${kvp.name}!`, {
         set: action,
         got: kvp.value
       })

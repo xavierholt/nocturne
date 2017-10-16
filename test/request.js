@@ -2,159 +2,98 @@ const assert  = require('assert')
 const Policy  = require('../src/lib/policy.js')
 const request = require('../src/lib/request.js')
 const Ruleset = require('../src/lib/ruleset.js')
-const sinon   = require('sinon')
 const tab     = require('../src/lib/tab.js')
 
 describe('request', function() {
-  const REQID = 13
-  const TABID = 42
-
-  const FROM = 'https://www.example.com'
-  const GOOD = 'https://good.example.com'
-  const EVIL = 'https://evil.example.com'
-
-  beforeEach(function() {
-    request.cache.clear()
-  })
-
-  function stubPolicy(requestId, callback) {
-    let stub = sinon.stub()
-    request.cache.set(requestId, {[callback]: stub})
-    return stub
+  function mocreq(requestId, tabId, originUrl, url) {
+    return {requestId, tabId, originUrl, url}
   }
 
-  describe('#onBeforeRequest()', function() {
-    before(function() {
-      request.rules.add('www.example.com', 'good.example.com', new Policy({request: 'allow'}))
-      request.rules.add('www.example.com', 'evil.example.com', new Policy({request: 'block'}))
-      tab.cache.set(TABID, {url: new URL(FROM)})
+  afterEach(function() {
+    request.cache.clear()
+    request.rules.clear()
+    tab.cache.clear()
+  })
+
+  describe('#add()', function() {
+    it('should add new policies to the cache', function() {
+      request.add(mocreq('id', 0, 'http://foo.com', 'http://bar.com'))
+      assert(request.cache.get('id') instanceof Policy)
     })
 
-    after(function() {
-      request.rules = new Ruleset()
-      tab.cache.clear()
+    it('should look up policies in the rules list', function() {
+      request.rules.add('**.foo.com', '**.bar.com', new Policy({request: 'custom'}))
+      request.add(mocreq('id', 0, 'http://foo.com', 'http://bar.com'))
+      assert.strictEqual(request.cache.get('id').request, 'custom')
     })
 
-    it('should add new requests to the cache', function() {
-      request.handlers.onBeforeRequest({
-        requestId: REQID,
-        tabId:     TABID,
-        url:       GOOD
-      })
-
-      let pcy = request.cache.get(REQID)
-      assert.deepEqual(pcy.request, 'allow')
-    })
-
-    it('should run a callback if there is one', function() {
-      // TODO (there should always be one)
+    it('should return the policy it creates', function() {
+      let got = request.add(mocreq('id', 0, 'http://foo.com', 'http://bar.com'))
+      assert.strictEqual(got, request.cache.get('id'))
     })
   })
 
-  describe('#onBeforeSendHeaders()', function() {
-    it('should run a callback if there is one', function() {
-      let stub = stubPolicy(REQID, 'onBeforeSendHeaders')
-      request.handlers.onBeforeSendHeaders({requestId: REQID})
-      assert.strictEqual(stub.callCount, 1)
+  describe('#del()', function() {
+    it('should delete requests from the cache', function() {
+      request.cache.set('ruby', 'tuesday')
+      assert.strictEqual(request.cache.get('ruby'), 'tuesday')
+
+      request.del({requestId: 'ruby'})
+      assert(!request.cache.has('ruby'))
     })
 
-    it('should log errors for missing policies', function() {
+    it('should log a warning if there\'s nothing there', function() {
+      assert(!request.cache.has('bananas'))
+      assert.logs('warn', function() {
+        request.del({requestId: 'bananas'})
+      })
+    })
+  })
+
+  describe('#get()', function() {
+    it('should retrieve requests from the cache', function() {
+      request.cache.set('marco', 'polo')
+      assert.strictEqual(request.cache.get('marco'), 'polo')
+
+      let got = request.get({requestId: 'marco'})
+      assert.strictEqual(got, 'polo')
+    })
+
+    it('should log an error if there\'s nothing there', function() {
+      assert(!request.cache.has('donuts'))
       assert.logs('error', function() {
-        request.handlers.onBeforeSendHeaders({requestId: REQID})
+        let got = request.get({requestId: 'donuts'})
+        assert.strictEqual(got, undefined)
       })
-    })
-  })
-
-  describe('#onSendHeaders()', function() {
-    it('should run a callback if there is one', function() {
-      let stub = stubPolicy(REQID, 'onSendHeaders')
-      request.handlers.onSendHeaders({requestId: REQID})
-      assert.strictEqual(stub.callCount, 1)
-    })
-
-    it('should log errors for missing policies', function() {
-      assert.logs('error', function() {
-        request.handlers.onSendHeaders({requestId: REQID})
-      })
-    })
-  })
-
-  describe('#onHeadersReceived()', function() {
-    it('should run a callback if there is one', function() {
-      let stub = stubPolicy(REQID, 'onHeadersReceived')
-      request.handlers.onHeadersReceived({requestId: REQID})
-      assert.strictEqual(stub.callCount, 1)
-    })
-
-    it('should log errors for missing policies', function() {
-      assert.logs('error', function() {
-        request.handlers.onHeadersReceived({requestId: REQID})
-      })
-    })
-  })
-
-  describe('#onCompleted()', function() {
-    it('should remove the request from the cache', function() {
-      request.cache.set(REQID, null)
-      assert(request.cache.has(REQID))
-      request.handlers.onCompleted({requestId: REQID})
-      assert(!request.cache.has(REQID))
-    })
-  })
-
-  describe('#onErrorOccurred()', function() {
-    it('should remove the request from the cache', function() {
-      request.cache.set(REQID, null)
-      assert(request.cache.has(REQID))
-      request.handlers.onErrorOccurred({requestId: REQID})
-      assert(!request.cache.has(REQID))
     })
   })
 
   describe('#source()', function() {
     it('should use the tab URL if it can', function() {
-      let src = request.source({
-        originUrl: EVIL,
-        requestId: REQID,
-        tabId:     TABID,
-        url:       GOOD
-      })
-
-      assert.deepEqual(src, new URL(FROM))
+      tab.set(42, 'https://mystical-bear-paradise.com')
+      let url = request.source(mocreq('id', 42, 'http://foo.com', 'http://bar.com'))
+      assert.strictEqual(url, tab.get(42).url)
     })
 
     it('should log an error if the tab isn\'t cached', function() {
-      // Logs one error when it can't find the tab, and then another
-      // when it gives up and returns undefined.
-      assert.logs({error: 2}, function() {
-        request.source({
-          requestId: REQID,
-          tabId:     9.75,
-          url:       GOOD
-        })
+      // Logs an error when it can't find the tab
+      // Logs a warning when it uses the originUrl
+      assert.logs({error: 1, warn: 1}, function() {
+        let src = request.source(mocreq('id', 9.75, 'http://foo.com', 'http://bar.com'))
+        assert.deepEqual(src, new URL('http://bar.com'))
       })
     })
 
     it('should warn and use the origin URL if there is no tab', function() {
       assert.logs('warn', function() {
-        let src = request.source({
-          originUrl: EVIL,
-          requestId: REQID,
-          tabId:     0,
-          url:       GOOD
-        })
-
-        assert.deepEqual(src, new URL(EVIL))
+        let src = request.source(mocreq('id', -1, 'http://foo.com', 'http://bar.com'))
+        assert.deepEqual(src, new URL('http://bar.com'))
       })
     })
 
     it('should log an error if it can\'t determine the source', function() {
       assert.logs('error', function() {
-        let src = request.source({
-          requestId: REQID,
-          url:       GOOD
-        })
-
+        let src = request.source(mocreq('id', -1, undefined, 'http://bar.com'))
         assert.strictEqual(src, undefined)
       })
     })

@@ -1,5 +1,4 @@
 const logger  = require('./logger.js')
-const parse   = require('./parse.js')
 const Ruleset = require('./ruleset.js')
 const tab     = require('./tab.js')
 
@@ -26,58 +25,35 @@ function source(request) {
   return undefined
 }
 
-const handlers = {
-  onBeforeRequest: function(request) {
-    let src = source(request)
-    let dst = new URL(request.url)
-    let pcy = rules.get(src, dst)
+function add(request) {
+  let src = source(request)
+  let dst = new URL(request.url)
+  log(request, src, dst)
 
-    cache.set(request.requestId, pcy)
-    logger.debug(`Request ${request.requestId} (${request.type}): ${src? src.hostname:undefined} -> ${dst.hostname}`)
-    return pcy.onBeforeRequest(request)
-  },
+  let policy = rules.get(src, dst)
+  cache.set(request.requestId, policy)
+  return policy
+}
 
-  onBeforeSendHeaders: function(request) {
-    const pcy = cache.get(request.requestId)
-    if(pcy === undefined) {
-      // Theoretically unreachable...
-      logger.error('No policy cached for request!', request)
-    }
-    else {
-      return pcy.onBeforeSendHeaders(request)
-    }
-  },
-
-  onSendHeaders: function(request) {
-    // TODO: Only if validation is on!
-    const pcy = cache.get(request.requestId)
-    if(pcy === undefined) {
-      // Theoretically unreachable...
-      logger.error('No policy cached for request!', request)
-    }
-    else {
-      return pcy.onSendHeaders(request)
-    }
-  },
-
-  onHeadersReceived: function(request) {
-    const pcy = cache.get(request.requestId)
-    if(pcy === undefined) {
-      // Theoretically unreachable...
-      logger.error('No policy cached for request!', request)
-    }
-    else {
-      return pcy.onHeadersReceived(request)
-    }
-  },
-
-  onCompleted: function(request) {
-    cache.delete(request.requestId)
-  },
-
-  onErrorOccurred: function(request) {
+function del(request) {
+  if(cache.has(request.requestId)) {
     cache.delete(request.requestId)
   }
+  else {
+    logger.warn('No such policy to delete!', request)
+  }
+}
+
+function get(request) {
+  let policy = cache.get(request.requestId)
+  if(!policy) logger.error('No policy found for request!', request)
+  return policy
+}
+
+function log(r, src, dst) {
+  let s = (src)? src.origin : undefined
+  let d = (dst)? dst.origin : undefined
+  logger.debug(`Tab ${r.tabId} (${r.type}): ${s} -> ${d}`)
 }
 
 // Possible Values of the "WebRequest.type" Field
@@ -105,9 +81,11 @@ const types = [
 ]
 
 module.exports = {
-  cache:    cache,
-  handlers: handlers,
-  rules:    rules,
-  source:   source,
-  types:    types
+  add:    add,
+  cache:  cache,
+  del:    del,
+  get:    get,
+  rules:  rules,
+  source: source,
+  types:  types
 }

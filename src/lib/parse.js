@@ -1,24 +1,29 @@
 const logger = require('./logger.js')
 
+function cookie(input) {
+  let index = input.indexOf('=')
+  if(index > 0) return {
+    name:  input.slice(0, index),
+    value: input.slice(index + 1)
+  }
+}
+
 function cookies(input) {
-  let result = []
+  let results = []
   input.split(/\s*;\s*/).forEach(crumb => {
-    let index = crumb.indexOf('=')
-    if(index === -1) {
+    let result = cookie(crumb)
+    if(result === undefined) {
       logger.error('Failed to parse cookie!', {
         input: input,
         crumb: crumb
       })
     }
     else {
-      result.push({
-        name:  crumb.slice(0, index),
-        value: crumb.slice(index + 1)
-      })
+      results.push(result)
     }
   })
 
-  return result
+  return results
 }
 
 function rule(input) {
@@ -31,6 +36,23 @@ function rule(input) {
   return [host, path]
 }
 
+function setCookie(input) {
+  let flags  = input.split(/\s*;\s*/)
+  let crumb  = flags.shift()
+  let result = cookie(crumb)
+  if(result === undefined) {
+    logger.error('Failed to parse set-cookie!', {
+      input: input,
+      crumb: crumb
+    })
+  }
+  else {
+    result.flags = flags
+  }
+
+  return result
+}
+
 function url(input) {
   let host = input.hostname.split('.').reverse()
   let path = input.pathname.split('/').slice(1)
@@ -38,7 +60,8 @@ function url(input) {
 }
 
 module.exports = {
-  cookies: cookies,
-  rule:    rule,
-  url:     url
+  cookies:   cookies,
+  rule:      rule,
+  setCookie: setCookie,
+  url:       url
 }

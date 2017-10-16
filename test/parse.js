@@ -74,6 +74,41 @@ describe('parse', function() {
     })
   })
 
+  describe('#setCookie()', function() {
+    it('should be tested', function() {
+      assert.equal('TODO', true)
+    })
+
+    it('should parse set-cookie headers', function() {
+      let cookie = parse.setCookie('name=spartacus')
+      assert.strictEqual(cookie.name,  'name')
+      assert.strictEqual(cookie.value, 'spartacus')
+    })
+
+    it('should reject cookies with no assignment', function() {
+      assert.logs('error', function() {
+        let cookie = parse.setCookie('sid saw six sick sheep')
+        assert.strictEqual(cookie, undefined)
+      })
+    })
+
+    it('should reject cookies with no initial assignment', function() {
+      assert.logs('error', function() {
+        let cookie = parse.setCookie('steins;gate=awesome')
+        assert.strictEqual(cookie, undefined)
+      })
+    })
+
+    it('should leave cookie metadata attached to the result', function() {
+      let cookie = parse.setCookie('favorite=macaroon; Path=/;Secure; HttpOnly')
+      assert.deepEqual(cookie, {
+        name:  'favorite',
+        flags: ['Path=/', 'Secure', 'HttpOnly'],
+        value: 'macaroon'
+      })
+    })
+  })
+
   describe('#url()', function() {
     it('should do what you expect', function() {
       let url = new URL('https://www.example.com/path/to/file.txt')
