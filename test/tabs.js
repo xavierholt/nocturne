@@ -22,7 +22,7 @@ describe('tabs', function() {
     it('should do nothing if no such tab exists', function() {
       assert.strictEqual(tab.cache.get('nope'), undefined)
 
-      assert.logs('none', function() {tab.del('nope')})
+      assert.logs('error', function() {tab.del('nope')})
       assert.strictEqual(tab.cache.get('nope'), undefined)
     })
   })

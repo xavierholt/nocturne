@@ -75,10 +75,6 @@ describe('parse', function() {
   })
 
   describe('#setCookie()', function() {
-    it('should be tested', function() {
-      assert.equal('TODO', true)
-    })
-
     it('should parse set-cookie headers', function() {
       let cookie = parse.setCookie('name=spartacus')
       assert.strictEqual(cookie.name,  'name')

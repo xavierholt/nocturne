@@ -22,14 +22,85 @@ let mocrsp = function(headers = {}) {
 
 describe('Policy', function() {
   describe('#constructor()', function() {
-    it('should be tested', function() {
-      assert.equal('TODO', true)
+    it('should have reasonable defaults', function() {
+      let policy = new Policy()
+
+      assert.strictEqual(policy.cookies.action(), undefined)
+      assert.strictEqual(policy.headers.action(), undefined)
+      assert.strictEqual(policy.queries.action(), undefined)
+
+      assert.strictEqual(policy.encrypt, undefined)
+      assert.strictEqual(policy.request, undefined)
+      assert.strictEqual(policy.scripts, undefined)
+      assert.strictEqual(policy.storage, undefined)
+    })
+
+    it('should let you override things as well', function() {
+      let policy = new Policy({
+        cookies: 'samoas',
+        encrypt: 'everything',
+        headers: 'titlecase',
+        queries: 'when and where',
+        request: 'pretty please',
+        scripts: 'the scottish play',
+        storage: 'magnetic drum'
+      })
+
+      assert.strictEqual(policy.cookies.action(), 'samoas')
+      assert.strictEqual(policy.headers.action(), 'titlecase')
+      assert.strictEqual(policy.queries.action(), 'when and where')
+
+      assert.strictEqual(policy.encrypt, 'everything')
+      assert.strictEqual(policy.request, 'pretty please')
+      assert.strictEqual(policy.scripts, 'the scottish play')
+      assert.strictEqual(policy.storage, 'magnetic drum')
     })
   })
 
   describe('#merge()', function() {
-    it('should be tested', function() {
-      assert.equal('TODO', true)
+    it('should take on the other values where present', function() {
+      let policy = new Policy()
+      policy.merge(new Policy({
+        cookies: 'grasshoppers',
+        encrypt: 'your mom',
+        headers: 'this-is-kebab-case',
+        queries: 'to what avail?',
+        request: 'LEAVE',
+        scripts: 'hamlet',
+        storage: 'barrels'
+      }))
+
+      assert.strictEqual(policy.cookies.action(), 'grasshoppers')
+      assert.strictEqual(policy.headers.action(), 'this-is-kebab-case')
+      assert.strictEqual(policy.queries.action(), 'to what avail?')
+
+      assert.strictEqual(policy.encrypt, 'your mom')
+      assert.strictEqual(policy.request, 'LEAVE')
+      assert.strictEqual(policy.scripts, 'hamlet')
+      assert.strictEqual(policy.storage, 'barrels')
+    })
+
+    it('should keep its old values where the other has none', function() {
+      let policy = new Policy({
+        cookies: 'thin mints',
+        encrypt: 'with rot-13',
+        headers: 'CAPS LOCK',
+        queries: 'wherefore',
+        request: 'i wanna hold your hand',
+        scripts: 'twelfth night',
+        storage: 'a barn'
+      })
+
+      policy.merge(new Policy())
+
+      assert.strictEqual(policy.cookies.action(), 'thin mints')
+      assert.strictEqual(policy.headers.action(), 'CAPS LOCK')
+      assert.strictEqual(policy.queries.action(), 'wherefore')
+
+      assert.strictEqual(policy.encrypt, 'with rot-13')
+      assert.strictEqual(policy.request, 'i wanna hold your hand')
+      assert.strictEqual(policy.scripts, 'twelfth night')
+      assert.strictEqual(policy.storage, 'a barn')
     })
   })
 

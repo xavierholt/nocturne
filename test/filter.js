@@ -1,7 +1,7 @@
 const assert = require('assert')
 const Filter = require('../src/lib/filter.js')
 
-context('Filter', function() {
+describe('Filter', function() {
   describe('#constructor()', function() {
     it('should have a default of undefined', function() {
       let filter = new Filter('dummy')

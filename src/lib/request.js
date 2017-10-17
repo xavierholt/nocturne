@@ -28,7 +28,7 @@ function source(request) {
 function add(request) {
   let src = source(request)
   let dst = new URL(request.url)
-  log(request, src, dst)
+  // log(request, src, dst)
 
   let policy = rules.get(src, dst)
   cache.set(request.requestId, policy)
@@ -50,11 +50,11 @@ function get(request) {
   return policy
 }
 
-function log(r, src, dst) {
-  let s = (src)? src.origin : undefined
-  let d = (dst)? dst.origin : undefined
-  logger.debug(`Tab ${r.tabId} (${r.type}): ${s} -> ${d}`)
-}
+// function log(r, src, dst) {
+//   let s = (src)? src.origin : undefined
+//   let d = (dst)? dst.origin : undefined
+//   logger.debug(`Tab ${r.tabId} (${r.type}): ${s} -> ${d}`)
+// }
 
 // Possible Values of the "WebRequest.type" Field
 // https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/ResourceType

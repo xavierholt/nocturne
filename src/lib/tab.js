@@ -10,9 +10,13 @@ class Tab {
 const cache = new Map()
 
 function del(id) {
-  if(!cache.has(id)) return
-  logger.debug(`Tab ${id} removed.`)
-  cache.delete(id)
+  if(cache.has(id)) {
+    logger.debug(`Tab ${id} removed.`)
+    cache.delete(id)
+  }
+  else {
+    logger.error(`No such tab (${id}) to delete!`)
+  }
 }
 
 function get(id) {
