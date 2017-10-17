@@ -102,6 +102,13 @@ describe('Policy', function() {
       assert.strictEqual(policy.scripts, 'twelfth night')
       assert.strictEqual(policy.storage, 'a barn')
     })
+
+    it('should merge its constituent filters', function() {
+      let policy = new Policy({cookies: {'thin mints': 'block'}})
+      policy.merge(new Policy({cookies: {'shortbread': 'allow'}}))
+      assert.strictEqual(policy.cookies.action({name: 'thin mints'}), 'block')
+      assert.strictEqual(policy.cookies.action({name: 'shortbread'}), 'allow')
+    })
   })
 
   describe('#onBeforeRequest()', function() {
