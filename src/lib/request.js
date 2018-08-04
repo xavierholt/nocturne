@@ -9,7 +9,7 @@ function source(request) {
   if(request.tabId > 0) {
     // NOTE: Potential race condition!
     // What's the tab URL of a main_frame request?
-    let srctab = tab.cache.get(request.tabId)
+    let srctab = tab.get(request.tabId)
     if(srctab !== undefined) return srctab.url
     logger.error('No such tab cached!', request)
   }

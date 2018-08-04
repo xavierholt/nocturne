@@ -181,7 +181,7 @@ describe('Policy', function() {
       assert.strictEqual(result, undefined)
     })
 
-    it('should block all cookies if old to', function() {
+    it('should block all cookies if told to', function() {
       let policy  = new Policy({cookies: 'block'})
       let request = mocreq({'Cookie': 'favorite=macaron'})
       let result  = policy.onBeforeSendHeaders(request)

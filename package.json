@@ -22,11 +22,11 @@
   "devDependencies": {
     "babili-webpack-plugin": "^0.1.2",
     "istanbul": "^0.4.5",
-    "mocha": "^3.5.3",
+    "mocha": "^5.2.0",
     "optipng": "latest",
-    "sinon": "^3.3.0",
+    "sinon": "^6.1.4",
     "svgexport": "latest",
-    "webpack": "^3.7.1"
+    "webpack": "^3.12.0"
   },
   "scripts": {
     "benchmark": "node ./time/bench.js",
