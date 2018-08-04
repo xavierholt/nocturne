@@ -57,16 +57,34 @@ h2 {
   margin: 5px;
   background-color: #ccc;
   overflow-y: scroll;
+  padding-bottom: 20px;
   flex: 1 1 auto;
   width: 25%;
 }
 
+.search {
+  margin: 1px 5px 10px 5px;
+}
+
+.search input {
+  border: none;
+  /*border: 1px solid #888;*/
+  /*box-sizing: border-box;*/
+  padding: 5px;
+  width: 100%;
+}
+
 a.item {
+  border-bottom: 1px solid #ccc;
   cursor: pointer;
   display: block;
   background-color: #ffe;
-  margin: 10px;
+  margin: 0px 10px;
   padding: 5px;
-  min-height: 40px;
+  /*min-height: 40px;*/
+}
+
+.spacer {
+  height: 10px;
 }
 

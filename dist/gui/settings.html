@@ -3,13 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="settings.css" />
+    <script src="/ext/browser-0.1.1.js"></script>
+    <script src="/ext/preact-8.2.5.js"></script>
   </head>
   <body>
     <h1><img src="/img/icon.svg"/> Nocturne</h1>
     <div id="content">
       <div id="col1" class="column">
         <h2>Rule Source </h2>
-        <input type="search" placeholder="Filter..." />
+        <div class="search">
+          <input type="search" placeholder="Filter..." />
+        </div>
         <a class="item">Temporary Rules</a>
         <a class="item">Local Rules</a>
         <a class="item">Synced Rules</a>
@@ -34,12 +38,22 @@
         <a class="item">Downloaded Stuff</a>
         <a class="item">Ad Servers</a>
         <a class="item">Trackers</a>
+        <a class="item">Ad Servers</a>
+        <a class="item">Trackers</a>
+        <a class="item">Temporary Rules</a>
+        <a class="item">Local Rules</a>
+        <a class="item">Synced Rules</a>
+        <a class="item">Downloaded Stuff</a>
+        <a class="item">Ad Servers</a>
+        <a class="item">Trackers</a>
+        <a class="item">Temporary Rules</a>
+        <a class="item">Local Rules</a>
+        <a class="item">Synced Rules</a>
       </div>
-      <div id="col2" class="column"><h2>Source</h2></div>
+      <div id="col2" class="column"></div>
       <div id="col3" class="column"><h2>Destination</h2></div>
       <div id="col4" class="column"><h2>Details</h2></div>
     </div>
-    <script src="/ext/browser-0.1.1.js"></script>
-    <script src="/gui/settings.js"></script>
+    <script src="/src/gui.min.js"></script>
   </body>
 </html>
